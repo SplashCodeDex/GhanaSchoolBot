@@ -13,6 +13,7 @@ build/
 downloads/
 resources/
 scraped-data/
+storage/
 *.pdf
 *.docx
 *.doc
