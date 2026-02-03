@@ -2,6 +2,23 @@ import fs from 'fs';
 import path from 'path';
 import axios from 'axios';
 import * as mime from 'mime-types';
+import { GoogleDriveService } from './drive-uploader';
+
+// Load config for drive settings
+const configPath = path.resolve('config.json');
+const config = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
+
+let driveService: GoogleDriveService | null = null;
+if (config.googleDrive && config.googleDrive.enabled) {
+    try {
+        const keyPath = path.resolve(config.googleDrive.credentialsPath);
+        const tokenPath = path.resolve(config.googleDrive.tokenPath);
+        driveService = new GoogleDriveService(keyPath, tokenPath, config.googleDrive.folderId);
+        console.log('[DRIVE] Service initialized.');
+    } catch (err: any) {
+        console.error('[DRIVE] Initialization failed:', err.message);
+    }
+}
 
 /**
  * recursively searches for a filename in the base directory.
@@ -73,22 +90,50 @@ export async function downloadFile(url: string, folder: string) {
             if (ext) filename = `${filename}.${ext}`;
         }
 
-        const filePath = path.resolve(folder, filename);
+        // Ensure directories exist
+        const incomingDir = path.resolve('downloads', 'incoming');
+        const finishedDir = path.resolve('downloads', 'finished');
+        if (!fs.existsSync(incomingDir)) fs.mkdirSync(incomingDir, { recursive: true });
+        if (!fs.existsSync(finishedDir)) fs.mkdirSync(finishedDir, { recursive: true });
 
-        // Ensure folder exists
-        if (!fs.existsSync(folder)) {
-            fs.mkdirSync(folder, { recursive: true });
-        }
-
+        const filePath = path.join(incomingDir, filename);
         const writer = fs.createWriteStream(filePath);
         response.data.pipe(writer);
 
         return new Promise((resolve, reject) => {
-            writer.on('finish', () => {
+            writer.on('finish', async () => {
                 console.log(`[DOWNLOADED] ${filename}`);
-                resolve(filePath);
+
+                // Move from incoming to finished (Scenario 6: Race Condition Prevention)
+                const finalPath = path.join(finishedDir, filename);
+                try {
+                    fs.renameSync(filePath, finalPath);
+                } catch (err: any) {
+                    console.error(`[MOVE] Failed to move ${filename} to finished:`, err.message);
+                    return reject(err);
+                }
+
+                // --- Upload to Google Drive if enabled ---
+                if (driveService) {
+                    const fileId = await driveService.uploadFile(finalPath);
+
+                    // --- Auto-cleanup if enabled and upload successful ---
+                    if (fileId && config.googleDrive.autoCleanup) {
+                        try {
+                            fs.unlinkSync(finalPath);
+                            console.log(`[CLEANUP] Deleted local file: ${filename}`);
+                        } catch (err: any) {
+                            console.error(`[CLEANUP] Failed to delete ${filename}:`, err.message);
+                        }
+                    }
+                }
+
+                resolve(finalPath);
             });
-            writer.on('error', reject);
+            writer.on('error', (err) => {
+                if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+                reject(err);
+            });
         });
     } catch (error) {
         // console.error(`Failed to download ${url}:`, error.message);

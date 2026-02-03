@@ -1,4 +1,4 @@
-import { PlaywrightCrawler } from 'crawlee';
+import { PlaywrightCrawler, ProxyConfiguration } from 'crawlee';
 import { router } from './routes';
 import fs from 'fs';
 import path from 'path';
@@ -7,17 +7,28 @@ import path from 'path';
 const configPath = path.resolve('config.json');
 const config = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
 
+// Configure proxy if provided
+let proxyConfiguration;
+if (config.proxyUrls && config.proxyUrls.length > 0) {
+    proxyConfiguration = new ProxyConfiguration({
+        proxyUrls: config.proxyUrls,
+    });
+}
+
 // Create an instance of the PlaywrightCrawler class.
 const crawler = new PlaywrightCrawler({
-    // Store data in memory for now (or use default storage)
-    // requestHandler: router,
     requestHandler: router,
+    proxyConfiguration,
 
     // Concurrency settings
     maxConcurrency: 5,
 
-    // Headless mode (set to false if you want to see the browser)
-    headless: true,
+    // Increased retries for stability on slow sites
+    maxRequestRetries: 3,
+    navigationTimeoutSecs: 90,
+
+    // Headless mode from config
+    headless: config.headless !== undefined ? config.headless : true,
 });
 
 async function main() {

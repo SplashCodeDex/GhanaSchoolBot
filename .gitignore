@@ -26,6 +26,8 @@ storage/
 .env
 .env.local
 .env.*.local
+client_secrets.json
+tokens.json
 
 # IDE and editor files
 .vscode/
