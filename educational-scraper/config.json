@@ -1,4 +1,5 @@
 {
+    "geminiApiKey": "AIzaSyBmqWTMFIwBzAwfpfnvAEhsZOpGJDLb_rY",
     "startUrls": [
         "https://mingycomputersgh.wordpress.com",
         "https://syllabusgh.com/",
@@ -83,5 +84,19 @@
         "jpeg",
         "png"
     ],
-    "downloadFolder": "downloads"
+    "downloadFolder": "downloads",
+    "headless": true,
+    "proxyUrls": [],
+    "maxConcurrency": 5,
+    "allowedOrigins": [
+        "http://localhost:5173",
+        "http://localhost:3000"
+    ],
+    "googleDrive": {
+        "enabled": true,
+        "autoCleanup": true,
+        "folderId": "1aLFHngDK0fC9xe3eA-GGkhVbj2o_QKaq",
+        "credentialsPath": "../client_secret_770970957761-lijcbltto2ba8vulbs3a01dudgrih21m.apps.googleusercontent.com.json",
+        "tokenPath": "../tokens.json"
+    }
 }

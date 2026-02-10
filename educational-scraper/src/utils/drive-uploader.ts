@@ -123,6 +123,51 @@ export class GoogleDriveService {
     }
 
     /**
+     * Lists all files in a specific folder
+     */
+    async listFilesInFolder(folderId: string): Promise<any[]> {
+        try {
+            const response = await this.drive.files.list({
+                q: `'${folderId}' in parents and trashed = false`,
+                fields: 'files(id, name, mimeType)',
+            });
+            return response.data.files || [];
+        } catch (error: any) {
+            console.error(`[DRIVE] Failed to list files in ${folderId}:`, error.message);
+            return [];
+        }
+    }
+
+    /**
+     * Downloads a file from Drive to a local path
+     */
+    async downloadFile(fileId: string, destPath: string): Promise<boolean> {
+        try {
+            const dest = fs.createWriteStream(destPath);
+            const response = await this.drive.files.get(
+                { fileId, alt: 'media' },
+                { responseType: 'stream' }
+            );
+
+            return new Promise((resolve, reject) => {
+                response.data
+                    .on('end', () => {
+                        console.log(`[DRIVE] Downloaded file to: ${destPath}`);
+                        resolve(true);
+                    })
+                    .on('error', (err: any) => {
+                        console.error('[DRIVE] Download stream error:', err.message);
+                        reject(false);
+                    })
+                    .pipe(dest);
+            });
+        } catch (error: any) {
+            console.error(`[DRIVE] Download failed for ${fileId}:`, error.message);
+            return false;
+        }
+    }
+
+    /**
      * Lists all files and folders in the target root folder
      */
     async listAllInRoot(): Promise<any[]> {
@@ -147,6 +192,24 @@ export class GoogleDriveService {
             return true;
         } catch (error: any) {
             console.error(`[DRIVE] Failed to delete ${fileId}:`, error.message);
+            return false;
+        }
+    }
+
+    /**
+     * Moves a file from one folder to another (Instant on Drive)
+     */
+    async moveFile(fileId: string, currentFolderId: string, newFolderId: string): Promise<boolean> {
+        try {
+            await this.drive.files.update({
+                fileId,
+                addParents: newFolderId,
+                removeParents: currentFolderId,
+                fields: 'id, parents',
+            });
+            return true;
+        } catch (error: any) {
+            console.error(`[DRIVE] Move failed for ${fileId}:`, error.message);
             return false;
         }
     }

@@ -2,10 +2,15 @@ import { PlaywrightCrawler, ProxyConfiguration } from 'crawlee';
 import { router } from './routes';
 import fs from 'fs';
 import path from 'path';
+import { StatsManager } from './utils/stats-manager';
 
 // Load config
 const configPath = path.resolve('config.json');
 const config = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
+
+// Initialize stats manager
+const statsManager = new StatsManager();
+const maxConcurrency = config.maxConcurrency || 5;
 
 // Configure proxy if provided
 let proxyConfiguration;
@@ -21,7 +26,7 @@ const crawler = new PlaywrightCrawler({
     proxyConfiguration,
 
     // Concurrency settings
-    maxConcurrency: 5,
+    maxConcurrency: maxConcurrency,
 
     // Increased retries for stability on slow sites
     maxRequestRetries: 3,
@@ -33,7 +38,26 @@ const crawler = new PlaywrightCrawler({
 
 async function main() {
     console.log('Starting crawler with URLs from config:', config.startUrls);
+    
+    // Update stats: crawler started
+    statsManager.setRunning(true, maxConcurrency);
+    
+    // Monitor crawler statistics
+    setInterval(() => {
+        const crawlerStats = crawler.stats;
+        if (crawlerStats) {
+            // Update active threads based on crawler's internal state
+            const activeRequests = crawlerStats.state?.requestsInProgress || 0;
+            statsManager.setActiveThreads(activeRequests);
+        }
+    }, 2000);
+    
     await crawler.run(config.startUrls);
+    
+    // Update stats: crawler finished
+    statsManager.setRunning(false);
+    statsManager.setActiveThreads(0);
+    
     console.log('Crawler finished.');
 }
 

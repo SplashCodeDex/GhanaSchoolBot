@@ -97,6 +97,9 @@ async function processFiles() {
         } catch (err: any) {
             console.error(`[LOCAL] Move failed for ${filename}:`, err.message);
         }
+
+        // Extra throttle to stay under RPM limits
+        await new Promise(r => setTimeout(r, 2000));
     }
 
     // 2. SYNC STRUCTURE TO DRIVE

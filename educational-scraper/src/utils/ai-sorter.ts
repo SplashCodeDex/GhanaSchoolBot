@@ -39,7 +39,11 @@ export class AISorter {
         });
     }
 
-    async getClassification(filename: string, context?: string): Promise<{ grade: string, subject: string, confidence: number }> {
+    private sleep(ms: number) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    async getClassification(filename: string, context?: string, retries: number = 3): Promise<{ grade: string, subject: string, confidence: number }> {
         const prompt = `
             You are an educational resource expert in Ghana.
             Classify the file into a Grade and a Subject.
@@ -66,26 +70,34 @@ export class AISorter {
             4. If unsure, use "Uncategorized".
         `.trim();
 
-        try {
-            const result = await this.model.generateContent(prompt);
-            const response = await result.response;
-            const data = JSON.parse(response.text());
+        for (let i = 0; i < retries; i++) {
+            try {
+                const result = await this.model.generateContent(prompt);
+                const response = await result.response;
+                const data = JSON.parse(response.text());
 
-            let grade = this.categories.includes(data.grade) ? data.grade : "Uncategorized";
-            let subject = data.subject || "Uncategorized";
-            const confidence = data.confidence || 0.5;
+                let grade = this.categories.includes(data.grade) ? data.grade : "Uncategorized";
+                let subject = data.subject || "Uncategorized";
+                const confidence = data.confidence || 0.5;
 
-            // Scenario 1: Strict Subject Validation
-            const allowedSubjects = grade.startsWith("SHS") ? this.shsSubjects : this.jhsSubjects;
-            if (grade !== "Uncategorized" && !allowedSubjects.includes(subject)) {
-                console.warn(`[AI] Hallucinated subject "${subject}". Reverting to Uncategorized.`);
-                subject = "Uncategorized";
+                const allowedSubjects = grade.startsWith("SHS") ? this.shsSubjects : this.jhsSubjects;
+                if (grade !== "Uncategorized" && !allowedSubjects.includes(subject)) {
+                    console.warn(`[AI] Hallucinated subject "${subject}". Reverting to Uncategorized.`);
+                    subject = "Uncategorized";
+                }
+
+                return { grade, subject, confidence };
+            } catch (error: any) {
+                if (error.message?.includes("429") || error.message?.includes("Quota")) {
+                    const waitTime = (i + 1) * 5000;
+                    console.warn(`[AI] Rate limit hit. Retrying in ${waitTime / 1000}s... (Attempt ${i + 1}/${retries})`);
+                    await this.sleep(waitTime);
+                    continue;
+                }
+                console.error(`[AI] Categorization failed for ${filename}:`, error.message);
+                break;
             }
-
-            return { grade, subject, confidence };
-        } catch (error: any) {
-            console.error(`[AI] Categorization failed for ${filename}:`, error.message);
-            return { grade: "Uncategorized", subject: "Uncategorized", confidence: 0 };
         }
+        return { grade: "Uncategorized", subject: "Uncategorized", confidence: 0 };
     }
 }

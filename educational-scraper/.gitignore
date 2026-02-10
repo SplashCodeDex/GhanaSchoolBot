@@ -1,0 +1,36 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+build/
+
+# Logs
+*.log
+logs/
+
+# Environment variables
+.env
+.env.local
+
+# Test files and temporary files
+test-upload*.txt
+tmp_rovodev_*
+stats.json
+
+# Downloads folder (optional - uncomment if you don't want to track downloads)
+# downloads/
+
+# Tokens and credentials (already in root .gitignore but good to be explicit)
+tokens.json
+*.apps.googleusercontent.com.json
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo

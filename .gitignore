@@ -26,7 +26,8 @@ storage/
 .env
 .env.local
 .env.*.local
-client_secrets.json
+client_secret*.json
+tactms*.json
 tokens.json
 
 # IDE and editor files

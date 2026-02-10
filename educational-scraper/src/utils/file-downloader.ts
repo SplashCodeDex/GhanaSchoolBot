@@ -39,11 +39,9 @@ function fileExistsRecursively(baseDir: string, filename: string): boolean {
     return false;
 }
 
-export async function downloadFile(url: string, folder: string) {
+export async function downloadFile(url: string, folder: string): Promise<boolean> {
     try {
         // 1. Determine Filename
-        // We do a HEAD request first or just parse URL to get name?
-        // Let's just parse URL first to save bandwidth, if it looks generic we head.
         let filename = path.basename(new URL(url).pathname);
         if (!filename || filename.length < 3) filename = `download_${Date.now()}`;
 
@@ -51,11 +49,10 @@ export async function downloadFile(url: string, folder: string) {
         filename = filename.replace(/[^a-z0-9._-]/gi, '_');
 
         // 2. Check overlap with ANY existing file in the downloads/ folder (recursive)
-        // The user said: "make sure it doesn't save already existing files" and they sort them manually.
         const rootDownloads = path.resolve('downloads');
         if (fileExistsRecursively(rootDownloads, filename)) {
             console.log(`[SKIP] Already exists: ${filename}`);
-            return;
+            return false; // File already exists, not an error but not a new download
         }
 
         // 3. Download
@@ -78,7 +75,7 @@ export async function downloadFile(url: string, folder: string) {
                     filename = headerName;
                     if (fileExistsRecursively(rootDownloads, filename)) {
                         console.log(`[SKIP] Already exists (header-name): ${filename}`);
-                        return;
+                        return false; // File already exists
                     }
                 }
             }
@@ -100,7 +97,7 @@ export async function downloadFile(url: string, folder: string) {
         const writer = fs.createWriteStream(filePath);
         response.data.pipe(writer);
 
-        return new Promise((resolve, reject) => {
+        return new Promise<boolean>((resolve, reject) => {
             writer.on('finish', async () => {
                 console.log(`[DOWNLOADED] ${filename}`);
 
@@ -110,7 +107,7 @@ export async function downloadFile(url: string, folder: string) {
                     fs.renameSync(filePath, finalPath);
                 } catch (err: any) {
                     console.error(`[MOVE] Failed to move ${filename} to finished:`, err.message);
-                    return reject(err);
+                    return resolve(false); // Move failed
                 }
 
                 // --- Upload to Google Drive if enabled ---
@@ -128,14 +125,15 @@ export async function downloadFile(url: string, folder: string) {
                     }
                 }
 
-                resolve(finalPath);
+                resolve(true); // Success
             });
             writer.on('error', (err) => {
                 if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
-                reject(err);
+                resolve(false); // Download failed
             });
         });
-    } catch (error) {
-        // console.error(`Failed to download ${url}:`, error.message);
+    } catch (error: any) {
+        console.error(`Failed to download ${url}:`, error.message);
+        return false; // Error occurred
     }
 }
