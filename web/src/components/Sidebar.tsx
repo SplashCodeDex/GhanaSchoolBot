@@ -6,6 +6,8 @@ import {
     Power,
     Activity,
     BookOpen,
+    ClipboardCheck,
+    FileEdit,
     ChevronLeft,
     ChevronRight
 } from 'lucide-react';
@@ -35,6 +37,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
         { id: 'overview', label: 'Overview', icon: LayoutDashboard },
         { id: 'process', label: 'Process', icon: Terminal },
         { id: 'resources', label: 'Resources', icon: Files },
+        { id: 'lesson-notes', label: 'Lesson Notes', icon: FileEdit },
+        { id: 'exams', label: 'Exam Builder', icon: ClipboardCheck },
         { id: 'settings', label: 'Settings', icon: Settings }
     ];
 

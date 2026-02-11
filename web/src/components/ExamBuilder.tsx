@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ClipboardCheck, Sparkles, AlertCircle, Loader2, Save, FileText, CheckCircle2 } from 'lucide-react';
-import { useAIGeneration, ExamRequest } from '../hooks/useAIGeneration';
+import { useAIGeneration } from '../hooks/useAIGeneration';
+import type { ExamRequest } from '../hooks/useAIGeneration';
 
 export const ExamBuilder: React.FC = () => {
     const { loading, error, generatedExam, generateExam, reset } = useAIGeneration();

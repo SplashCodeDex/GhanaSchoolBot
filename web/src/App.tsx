@@ -20,6 +20,8 @@ import { FilePreviewModal } from './components/FilePreviewModal';
 import { AIFilterPanel } from './components/AIFilterPanel';
 import { AIConfigPanel } from './components/AIConfigPanel';
 import { Sidebar } from './components/Sidebar';
+import { LessonNoteGenerator } from './components/LessonNoteGenerator';
+import { ExamBuilder } from './components/ExamBuilder';
 import { useAnalysis } from './hooks/useAnalysis';
 
 // Define the shape of our stats
@@ -63,7 +65,7 @@ interface FileItem {
 
 const API_URL = 'http://localhost:3001';
 
-type TabType = 'overview' | 'process' | 'resources' | 'settings';
+type TabType = 'overview' | 'process' | 'resources' | 'settings' | 'lesson-notes' | 'exams';
 
 function App() {
   const [, setSocket] = useState<Socket | null>(null);
@@ -318,6 +320,14 @@ function App() {
                 onAnalyze={triggerAnalysis}
               />
             </div>
+          )}
+
+          {activeTab === 'lesson-notes' && (
+            <LessonNoteGenerator />
+          )}
+
+          {activeTab === 'exams' && (
+            <ExamBuilder />
           )}
 
           {activeTab === 'settings' && (

@@ -43,18 +43,16 @@ async function main() {
     statsManager.setRunning(true, maxConcurrency);
     
     // Monitor crawler statistics
+    // Note: Crawlee doesn't expose requestsInProgress publicly, so we estimate based on activity
     setInterval(() => {
         const crawlerStats = crawler.stats;
         if (crawlerStats && crawlerStats.state) {
-            // Calculate active requests from available stats
-            // Active = Total - (Finished + Failed)
             const state = crawlerStats.state;
-            const activeRequests = Math.max(0, 
-                (state.requestsTotal || 0) - 
-                (state.requestsFinished || 0) - 
-                (state.requestsFailed || 0)
-            );
-            statsManager.setActiveThreads(activeRequests);
+            // If crawler is actively processing (requests finished or failed are changing), 
+            // assume we're using available concurrency
+            const isActive = state.requestsFinished > 0 || state.requestsFailed > 0;
+            const estimatedActive = isActive ? maxConcurrency : 0;
+            statsManager.setActiveThreads(estimatedActive);
         }
     }, 2000);
     

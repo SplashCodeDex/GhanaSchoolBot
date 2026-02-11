@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { BookOpen, Sparkles, AlertCircle, Loader2, Save, FileText } from 'lucide-react';
 import { useAIGeneration } from '../hooks/useAIGeneration';
+import type { LessonNoteRequest } from '../hooks/useAIGeneration';
 
 export const LessonNoteGenerator: React.FC = () => {
     const { loading, error, generatedNote, generateLessonNote, reset } = useAIGeneration();
