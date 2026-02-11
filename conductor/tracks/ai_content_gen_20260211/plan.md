@@ -30,8 +30,8 @@
 - [x] Task: Conductor - User Manual Verification 'Phase 3: Frontend Integration' (Protocol in workflow.md)
 
 ## Phase 4: Content Preview & Persistence
-- [~] Task: Create web/src/components/ContentPreview.tsx using a Markdown renderer.
-- [ ] Task: Implement Feature - Real-time preview of generated content.
-- [ ] Task: Create persistence logic (e.g., local storage or simple backend save) for generated content.
+- [x] Task: Create web/src/components/ContentPreview.tsx using a Markdown renderer. (826ccaa)
+- [x] Task: Implement Feature - Real-time preview of generated content. (826ccaa)
+- [~] Task: Create persistence logic (e.g., local storage or simple backend save) for generated content.
 - [ ] Task: Implement Feature - "Save for later" and "Export" functionality.
 - [ ] Task: Conductor - User Manual Verification 'Phase 4: Final Polish and Export' (Protocol in workflow.md)
