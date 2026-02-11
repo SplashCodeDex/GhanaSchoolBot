@@ -6,7 +6,7 @@
 - [x] Task: Implement Feature - Basic AIGeneratorService with Gemini integration. (0a59afa)
 - [x] Task: Write Tests - Verify prompt template construction for Lesson Notes. (8e19149)
 - [x] Task: Implement Feature - generateLessonNotePrompt logic. (8ec8e37)
-- [ ] Task: Write Tests - Verify prompt template construction for Examinations.
+- [x] Task: Write Tests - Verify prompt template construction for Examinations. (2ae72f1)
 - [ ] Task: Implement Feature - generateExamPrompt logic.
 - [ ] Task: Conductor - User Manual Verification 'Phase 1: AI Service Foundation' (Protocol in workflow.md)
 
