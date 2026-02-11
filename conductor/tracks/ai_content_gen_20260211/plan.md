@@ -7,7 +7,7 @@
 - [x] Task: Write Tests - Verify prompt template construction for Lesson Notes. (8e19149)
 - [x] Task: Implement Feature - generateLessonNotePrompt logic. (8ec8e37)
 - [x] Task: Write Tests - Verify prompt template construction for Examinations. (2ae72f1)
-- [ ] Task: Implement Feature - generateExamPrompt logic.
+- [x] Task: Implement Feature - generateExamPrompt logic. (eebf814)
 - [ ] Task: Conductor - User Manual Verification 'Phase 1: AI Service Foundation' (Protocol in workflow.md)
 
 ## Phase 2: Backend API Implementation
