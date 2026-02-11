@@ -1,24 +1,31 @@
 import React from 'react';
+import type { LucideIcon } from 'lucide-react';
 
 interface StatCardProps {
     title: string;
     value: string | number;
-    icon?: React.ReactNode;
+    icon?: LucideIcon;
     trend?: string;
+    highlight?: 'success' | 'warning' | 'danger' | 'info';
 }
 
-export const StatCard: React.FC<StatCardProps> = ({ title, value, icon, trend }) => {
+export const StatCard: React.FC<StatCardProps> = ({ title, value, icon: Icon, trend, highlight }) => {
+    const getHighlightClass = () => {
+        if (!highlight) return '';
+        return `text-${highlight}`;
+    };
+
     return (
-        <div className="glass-card stat-card">
-            <div className="stat-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-                <h3 style={{ fontSize: '14px', color: 'var(--text-secondary)', fontWeight: 500 }}>{title}</h3>
-                {icon && <span className="stat-icon" style={{ color: 'var(--accent-primary)' }}>{icon}</span>}
+        <div className="card stat-card">
+            <div className="stat-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
+                <span className="card-title">{title}</span>
+                {Icon && <Icon size={18} className={getHighlightClass()} style={{ color: highlight ? `var(--${highlight})` : 'var(--text-muted)' }} />}
             </div>
-            <div className="stat-value" style={{ fontSize: '32px', fontWeight: 700, color: 'var(--text-primary)' }}>
+            <div className="card-value" style={{ color: highlight ? `var(--${highlight})` : 'var(--text-primary)' }}>
                 {value}
             </div>
             {trend && (
-                <div className="stat-trend" style={{ fontSize: '12px', marginTop: '8px', color: 'var(--success)' }}>
+                <div style={{ fontSize: '12px', marginTop: '6px', color: 'var(--text-muted)' }}>
                     {trend}
                 </div>
             )}

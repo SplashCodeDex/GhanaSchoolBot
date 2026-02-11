@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react';
+import { Terminal as TerminalIcon, History } from 'lucide-react';
 
 interface LogEntry {
     message: string;
@@ -20,33 +21,52 @@ export const LogViewer: React.FC<LogViewerProps> = ({ logs }) => {
 
     const formatTime = (timestamp: string) => {
         try {
-            return new Date(timestamp).toLocaleTimeString();
+            return new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
         } catch {
-            return new Date().toLocaleTimeString();
+            return '--:--:--';
         }
     };
 
     return (
-        <div className="glass-panel" style={{ marginTop: '20px' }}>
-            <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--glass-border)', display: 'flex', justifyContent: 'space-between' }}>
-                <h3 style={{ fontSize: '14px', color: 'var(--text-secondary)' }}>Live Terminal</h3>
-                <span style={{ fontSize: '12px', color: 'var(--accent-primary)' }}>● Connected</span>
+        <div className="card" style={{ display: 'flex', flexDirection: 'column', height: '100%', padding: 0, overflow: 'hidden' }}>
+            <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--border-subtle)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <TerminalIcon size={16} className="text-muted" />
+                    <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-secondary)' }}>Live Process Logs</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <History size={14} className="text-muted" />
+                    <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{logs.length} entries</span>
+                </div>
             </div>
-            <div className="terminal" ref={terminalRef}>
-                {logs.length === 0 && <div style={{ color: '#444', fontStyle: 'italic' }}>Waiting for logs...</div>}
+            <div className="terminal-simple area-scroll" ref={terminalRef} style={{ flex: 1, border: 'none', borderRadius: 0 }}>
+                {logs.length === 0 && (
+                    <div style={{ color: 'var(--text-muted)', fontStyle: 'italic', padding: '12px' }}>
+                        Waiting for process cycles...
+                    </div>
+                )}
                 {logs.map((log, index) => {
-                    const message = log.message || log;
-                    const timestamp = log.timestamp || new Date().toISOString();
-                    
-                    let color = '#e0e0e0';
-                    if (message.toLowerCase().includes('error')) color = 'var(--danger)';
-                    if (message.toLowerCase().includes('success')) color = 'var(--success)';
-                    if (message.toLowerCase().includes('warn')) color = '#ffcc00';
+                    const message = typeof log === 'string' ? log : log.message;
+                    const timestamp = typeof log === 'string' ? new Date().toISOString() : log.timestamp;
+
+                    let color = 'var(--text-primary)';
+                    const msgLower = (message || '').toLowerCase();
+                    if (msgLower.includes('error') || msgLower.includes('fail')) color = 'var(--danger)';
+                    if (msgLower.includes('success') || msgLower.includes('done')) color = 'var(--success)';
+                    if (msgLower.includes('warn')) color = 'var(--warning)';
 
                     return (
-                        <div key={index} className="log-entry" style={{ color }}>
-                            <span style={{ opacity: 0.5, marginRight: '8px' }}>{formatTime(timestamp)}</span>
-                            {message}
+                        <div key={index} style={{
+                            padding: '2px 12px',
+                            fontSize: '12px',
+                            lineHeight: '1.6',
+                            borderLeft: `2px solid ${color === 'var(--text-primary)' ? 'transparent' : color}`,
+                            marginBottom: '1px'
+                        }}>
+                            <span style={{ opacity: 0.4, marginRight: '12px', fontSize: '11px', fontVariantNumeric: 'tabular-nums' }}>
+                                {formatTime(timestamp)}
+                            </span>
+                            <span style={{ color }}>{message}</span>
                         </div>
                     );
                 })}

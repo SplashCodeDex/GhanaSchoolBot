@@ -8,6 +8,7 @@ import path from 'path';
 import fs from 'fs';
 import { StatsManager } from './utils/stats-manager';
 import { scanDirectory } from './utils/file-scanner';
+import { AIPdfAnalyzer } from './utils/ai-pdf-analyzer';
 
 const app = express();
 const PORT = 3001;
@@ -74,6 +75,49 @@ const io = new Server(server, {
 });
 
 let scraperProcess: ChildProcess | null = null;
+let syncProcess: ChildProcess | null = null;
+let sortProcess: ChildProcess | null = null;
+
+// Helper to spawn background tasks
+const spawnBackgroundTask = (scriptName: string, name: string, onDone: (code: number | null) => void) => {
+    console.log(`Starting ${name} process...`);
+    const scriptPath = path.resolve(__dirname, scriptName);
+
+    const process = spawn('npx', ['ts-node', scriptPath], {
+        cwd: path.resolve(__dirname, '..'),
+        shell: true,
+        stdio: ['ignore', 'pipe', 'pipe']
+    });
+
+    if (process.stdout) {
+        process.stdout.on('data', (data) => {
+            const log = data.toString();
+            const timestamp = new Date().toISOString();
+            console.log(`[${name}]: ${log}`);
+            io.emit('log', { message: `[${name}] ${log}`, timestamp });
+        });
+    }
+
+    if (process.stderr) {
+        process.stderr.on('data', (data) => {
+            const log = data.toString();
+            const timestamp = new Date().toISOString();
+            console.error(`[${name} Error]: ${log}`);
+            io.emit('log', { message: `[${name} ERROR] ${log}`, timestamp });
+        });
+    }
+
+    process.on('close', (code) => {
+        console.log(`${name} process exited with code ${code}`);
+        io.emit('log', {
+            message: `[System]: ${name} process exited with code ${code}`,
+            timestamp: new Date().toISOString()
+        });
+        onDone(code);
+    });
+
+    return process;
+};
 
 // Initialize stats manager
 const statsManager = new StatsManager();
@@ -93,7 +137,46 @@ app.get('/api/files', (req, res) => {
 });
 
 app.get('/api/stats', (req, res) => {
-    res.json(statsManager.getStats());
+    const stats = statsManager.getStats();
+    res.json({
+        ...stats,
+        isSyncing: !!syncProcess,
+        isSorting: !!sortProcess
+    });
+});
+
+// Initialize AI PDF Analyzer
+const pdfAnalyzer = new AIPdfAnalyzer(config.geminiApiKey, downloadsPath);
+
+app.post('/api/analyze', async (req, res) => {
+    const { filePath } = req.body;
+
+    if (!filePath) {
+        return res.status(400).json({ error: 'filePath is required' });
+    }
+
+    // Resolve the full path relative to downloads folder
+    const fullPath = path.join(downloadsPath, filePath);
+
+    // Security: prevent directory traversal
+    if (!fullPath.startsWith(downloadsPath)) {
+        return res.status(403).json({ error: 'Access denied' });
+    }
+
+    if (!fs.existsSync(fullPath)) {
+        return res.status(404).json({ error: 'File not found' });
+    }
+
+    try {
+        const result = await pdfAnalyzer.analyze(fullPath, (msg) => {
+            // Stream progress to all connected frontends
+            io.emit('analysis-progress', { filePath, message: msg });
+        });
+        res.json(result);
+    } catch (error: any) {
+        console.error('[API] Analysis error:', error.message);
+        res.status(500).json({ error: error.message });
+    }
 });
 
 app.post('/api/start', (req, res) => {
@@ -101,63 +184,50 @@ app.post('/api/start', (req, res) => {
         return res.status(400).json({ message: 'Scraper is already running' });
     }
 
-    console.log("Starting scraper process...");
-
-    // Update stats: scraper is starting
     statsManager.setRunning(true, config.maxConcurrency || 5);
 
-    const scriptPath = path.resolve(__dirname, 'main.ts');
-
-    // Spawn ts-node execution
-    scraperProcess = spawn('npx', ['ts-node', scriptPath], {
-        cwd: path.resolve(__dirname, '..'),
-        shell: true, // Required for npx on Windows
-        stdio: ['ignore', 'pipe', 'pipe']
-    });
-
-    if (scraperProcess.stdout) {
-        scraperProcess.stdout.on('data', (data) => {
-            const log = data.toString();
-            const timestamp = new Date().toISOString();
-            console.log(`[Scraper]: ${log}`);
-
-            // Emit log with timestamp
-            io.emit('log', { message: log, timestamp });
-
-            // Track stats based on log patterns
-            if (log.includes('Downloaded:') || log.includes('Saved file:')) {
-                statsManager.incrementDownloaded();
-            }
-            if (log.includes('Error') || log.includes('Failed')) {
-                statsManager.incrementErrors();
-            }
-        });
-    }
-
-    if (scraperProcess.stderr) {
-        scraperProcess.stderr.on('data', (data) => {
-            const log = data.toString();
-            const timestamp = new Date().toISOString();
-            console.error(`[Scraper Error]: ${log}`);
-            io.emit('log', { message: `ERROR: ${log}`, timestamp });
-            statsManager.incrementErrors();
-        });
-    }
-
-    scraperProcess.on('close', (code) => {
-        const timestamp = new Date().toISOString();
-        console.log(`Scraper process exited with code ${code}`);
-        io.emit('log', { message: `[System]: Scraper process exited with code ${code}`, timestamp });
-
-        // Update stats: scraper stopped
+    scraperProcess = spawnBackgroundTask('main.ts', 'Scraper', (code) => {
+        scraperProcess = null;
         statsManager.setRunning(false);
         statsManager.setActiveThreads(0);
-
         io.emit('status', statsManager.getStats());
-        scraperProcess = null;
     });
 
-    io.emit('status', statsManager.getStats());
+    // Scraper-specific log monitoring for stats
+    scraperProcess.stdout?.on('data', (data) => {
+        const log = data.toString();
+
+        // Basic Download Stats
+        if (log.includes('Downloaded:') || log.includes('Saved file:')) {
+            statsManager.incrementDownloaded();
+            io.emit('status', statsManager.getStats());
+        }
+        if (log.includes('Error') || log.includes('Failed')) {
+            statsManager.incrementErrors();
+            io.emit('status', statsManager.getStats());
+        }
+
+        // AI PRE-FILTER TELEMETRY BRIDGING
+        // Pattern: ✅ AI Decision [85%]: http://...
+        const aiMatch = log.match(/([✅❌]) AI Decision \[(\d+)%\]/);
+        if (aiMatch) {
+            const approved = aiMatch[1] === '✅';
+            const confidence = parseInt(aiMatch[2]) / 100;
+            statsManager.updateAIFilterStats(approved, confidence);
+
+            if (!approved) {
+                statsManager.incrementFiltered();
+            }
+
+            io.emit('status', statsManager.getStats());
+        }
+    });
+
+    scraperProcess.stderr?.on('data', (data) => {
+        statsManager.incrementErrors();
+        io.emit('status', statsManager.getStats());
+    });
+
     res.json({ message: 'Scraper started' });
 });
 
@@ -166,15 +236,123 @@ app.post('/api/stop', (req, res) => {
         return res.status(400).json({ message: 'Scraper is not running' });
     }
 
-    console.log("Stopping scraper process...");
-    const killed = scraperProcess.kill('SIGINT'); // Try graceful shutdown first
-    if (!killed) {
-        // Force kill if needed (implementation detail: child_process.kill might not kill tree on Windows without tree-kill, but simple kill is a start)
-        scraperProcess.kill();
+    console.log("Stopping scraper process tree...");
+
+    // On Windows, a simple .kill() often leaves orphaned processes when using shell: true.
+    // We use taskkill to ensuring the entire tree is terminated.
+    if (process.platform === 'win32') {
+        spawn('taskkill', ['/F', '/T', '/PID', scraperProcess.pid!.toString()]);
+    } else {
+        scraperProcess.kill('SIGINT');
     }
 
-    // We'll let the 'close' event handler clean up the variable
+    scraperProcess = null;
+    statsManager.setRunning(false);
+    io.emit('status', statsManager.getStats());
+
     res.json({ message: 'Stop signal sent' });
+});
+
+// --- Phase 5: Sync & Sort Endpoints ---
+
+app.post('/api/sync/drive', (req, res) => {
+    if (syncProcess) return res.status(400).json({ message: 'Sync already in progress' });
+    syncProcess = spawnBackgroundTask('sync-existing.ts', 'DriveSync', () => {
+        syncProcess = null;
+        io.emit('status', statsManager.getStats());
+    });
+    res.json({ message: 'Google Drive Sync started' });
+});
+
+app.post('/api/sync/sort', (req, res) => {
+    if (sortProcess) return res.status(400).json({ message: 'Sorting already in progress' });
+    sortProcess = spawnBackgroundTask('sync-intelligent.ts', 'AISorter', () => {
+        sortProcess = null;
+        io.emit('status', statsManager.getStats());
+    });
+    res.json({ message: 'AI Sorting started' });
+});
+
+// --- AI Config Endpoints ---
+
+app.get('/api/config/ai-filter', (req, res) => {
+    try {
+        const configPath = path.resolve(__dirname, '../config.json');
+        const config = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
+
+        res.json({
+            config: {
+                enabled: config.aiPreFilter?.enabled || false,
+                targetSubjects: config.aiPreFilter?.targetSubjects || [],
+                targetGrades: config.aiPreFilter?.targetGrades || [],
+                minConfidence: config.aiPreFilter?.minConfidence || 0.65,
+                targetSites: config.startUrls || [],
+                logDecisions: config.aiPreFilter?.logDecisions || false,
+                enableCaching: config.aiPreFilter?.enableCaching !== false,
+                googleDrive: config.googleDrive || { enabled: false, autoCleanup: false, folderId: '' }
+            }
+        });
+    } catch (error: any) {
+        console.error('[API] Error reading config:', error.message);
+        res.status(500).json({ error: 'Failed to read configuration' });
+    }
+});
+
+app.post('/api/config/ai-filter', (req, res) => {
+    try {
+        const {
+            enabled, targetSubjects, targetGrades,
+            minConfidence, targetSites, logDecisions,
+            enableCaching, googleDrive
+        } = req.body;
+
+        // Read existing config
+        const configPath = path.resolve(__dirname, '../config.json');
+        const config = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
+
+        // Update AI filter settings
+        config.aiPreFilter = {
+            enabled: enabled !== undefined ? enabled : (config.aiPreFilter?.enabled || false),
+            targetSubjects: targetSubjects !== undefined ? targetSubjects : (config.aiPreFilter?.targetSubjects || []),
+            targetGrades: targetGrades !== undefined ? targetGrades : (config.aiPreFilter?.targetGrades || []),
+            minConfidence: minConfidence !== undefined ? minConfidence : (config.aiPreFilter?.minConfidence || 0.65),
+            enableCaching: enableCaching !== undefined ? enableCaching : (config.aiPreFilter?.enableCaching !== false),
+            logDecisions: logDecisions !== undefined ? logDecisions : (config.aiPreFilter?.logDecisions || false)
+        };
+
+        // Update Google Drive settings
+        if (googleDrive !== undefined) {
+            config.googleDrive = {
+                ...config.googleDrive,
+                ...googleDrive
+            };
+        }
+
+        // Update start URLs if provided
+        if (targetSites !== undefined) {
+            config.startUrls = targetSites;
+        }
+
+        // Write back to config.json
+        fs.writeFileSync(configPath, JSON.stringify(config, null, 4), 'utf-8');
+
+        console.log('[API] Configuration updated successfully');
+
+        // Notify all connected clients about config change
+        io.emit('config-updated', { aiPreFilter: config.aiPreFilter, googleDrive: config.googleDrive });
+
+        res.json({
+            success: true,
+            message: 'Configuration saved successfully',
+            config: {
+                aiPreFilter: config.aiPreFilter,
+                googleDrive: config.googleDrive
+            }
+        });
+    } catch (error: any) {
+        console.error('[API] Error saving config:', error.message);
+        res.status(500).json({ error: 'Failed to save configuration' });
+    }
 });
 
 // --- Socket.IO ---

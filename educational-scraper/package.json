@@ -8,6 +8,7 @@
     "server": "ts-node src/server.ts",
     "start": "ts-node src/main.ts",
     "test:upload": "ts-node src/test-upload.ts",
+    "test:ai-filter": "ts-node src/test-ai-prefilter.ts",
     "sync:existing": "ts-node src/sync-existing.ts",
     "sync:intelligent": "ts-node src/sync-intelligent.ts"
   },

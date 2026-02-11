@@ -1,4 +1,5 @@
 import React from 'react';
+import { Play, Square, Activity } from 'lucide-react';
 
 interface ControlPanelProps {
     isRunning: boolean;
@@ -8,38 +9,39 @@ interface ControlPanelProps {
 
 export const ControlPanel: React.FC<ControlPanelProps> = ({ isRunning, onStart, onStop }) => {
     return (
-        <div className="glass-panel" style={{ padding: '24px', marginBottom: '24px' }}>
+        <div className="card" style={{ borderLeft: `4px solid ${isRunning ? 'var(--success)' : 'var(--border-subtle)'}` }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
-                    <h2 style={{ fontSize: '18px', marginBottom: '8px' }}>Control Center</h2>
-                    <p style={{ color: 'var(--text-secondary)', fontSize: '14px', margin: 0 }}>
-                        Manage the educational resource scraper process.
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                        <Activity size={18} className={isRunning ? 'text-success' : 'text-muted'} style={{ color: isRunning ? 'var(--success)' : 'var(--text-muted)' }} />
+                        <h2 style={{ fontSize: '16px', fontWeight: 600 }}>Scraper Engine</h2>
+                    </div>
+                    <p style={{ color: 'var(--text-muted)', fontSize: '13px', margin: 0 }}>
+                        {isRunning ? 'Actively collecting educational resources.' : 'Engine is currently on standby.'}
                     </p>
                 </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <span style={{
-                            height: '10px',
-                            width: '10px',
-                            borderRadius: '50%',
-                            background: isRunning ? 'var(--success)' : '#555',
-                            boxShadow: isRunning ? '0 0 10px var(--success)' : 'none'
-                        }}></span>
-                        <span style={{ fontSize: '14px', fontWeight: 500, color: isRunning ? 'var(--success)' : 'var(--text-secondary)' }}>
+                        <span className={`status-dot ${isRunning ? 'status-online' : ''}`} style={{ background: isRunning ? 'var(--success)' : 'var(--text-muted)' }}></span>
+                        <span style={{ fontSize: '13px', fontWeight: 600, color: isRunning ? 'var(--success)' : 'var(--text-muted)' }}>
                             {isRunning ? 'RUNNING' : 'IDLE'}
                         </span>
                     </div>
 
-                    {!isRunning ? (
-                        <button className="btn btn-primary" onClick={onStart}>
-                            Bot Start
-                        </button>
-                    ) : (
-                        <button className="btn btn-danger" onClick={onStop}>
-                            Stop Process
-                        </button>
-                    )}
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                        {!isRunning ? (
+                            <button className="btn btn-primary" onClick={onStart}>
+                                <Play size={14} fill="currentColor" />
+                                Start Engine
+                            </button>
+                        ) : (
+                            <button className="btn btn-danger" onClick={onStop}>
+                                <Square size={14} fill="currentColor" />
+                                Stop Process
+                            </button>
+                        )}
+                    </div>
                 </div>
             </div>
         </div>

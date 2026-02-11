@@ -1,6 +1,7 @@
 import { createPlaywrightRouter } from 'crawlee';
 import { downloadFile } from './utils/file-downloader';
 import { StatsManager } from './utils/stats-manager';
+import { AIPreFilter, LinkContext } from './utils/ai-pre-filter';
 import path from 'path';
 import fs from 'fs';
 
@@ -13,6 +14,20 @@ const config = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
 // Initialize stats manager
 const statsManager = new StatsManager();
 
+// Initialize AI Pre-Filter if enabled
+let aiPreFilter: AIPreFilter | null = null;
+if (config.aiPreFilter?.enabled && config.geminiApiKey) {
+    aiPreFilter = new AIPreFilter(config.geminiApiKey, {
+        targetSubjects: config.aiPreFilter.targetSubjects || [],
+        targetGrades: config.aiPreFilter.targetGrades || [],
+        minConfidence: config.aiPreFilter.minConfidence || 0.65,
+        enableCaching: config.aiPreFilter.enableCaching !== false
+    });
+    console.log('✅ AI Pre-Filter enabled with config:', config.aiPreFilter);
+} else {
+    console.log('⚠️ AI Pre-Filter disabled');
+}
+
 const KEYWORDS_REGEX = new RegExp(config.keywords.join('|'), 'i');
 const EXTENSIONS_REGEX = new RegExp(`\\.(${config.fileExtensions.join('|')})$`, 'i');
 
@@ -24,34 +39,83 @@ router.addDefaultHandler(async ({ page, enqueueLinks, log, request }) => {
         const title = await page.title();
         // log.info(`Title: ${title}`);
 
-        // 1. Look for targeted download links
-        const extensionRegexStr = `\\.(${config.fileExtensions.join('|')})$`;
+        // 1. Look for targeted download links with context
+        const extensionRegexStr = `\\\\.(${config.fileExtensions.join('|')})$`;
 
-        const downloadLinks = await page.evaluate((regexStr) => {
+        const downloadLinksWithContext = await page.evaluate((regexStr) => {
             const regex = new RegExp(regexStr, 'i');
             const anchors = Array.from(document.querySelectorAll('a'));
             return anchors
-                .map(a => ({ href: a.href, text: a.innerText }))
-                // Filter by extension
-                .filter(link => regex.test(link.href))
-                .map(link => link.href);
+                .filter(a => regex.test(a.href))
+                .map(a => {
+                    // Extract context for AI analysis
+                    const parent = a.parentElement;
+                    const surroundingText = parent ? parent.innerText.slice(0, 300) : '';
+                    
+                    return {
+                        url: a.href,
+                        linkText: a.innerText.trim(),
+                        surroundingText: surroundingText,
+                        anchorAttributes: {
+                            title: a.title || '',
+                            className: a.className || ''
+                        }
+                    };
+                });
         }, extensionRegexStr);
 
-        if (downloadLinks.length > 0) {
-            log.info(`Found ${downloadLinks.length} potential downloads.`);
+        if (downloadLinksWithContext.length > 0) {
+            log.info(`Found ${downloadLinksWithContext.length} potential downloads.`);
             const downloadDir = path.resolve('downloads');
 
-            for (const link of downloadLinks) {
+            for (const linkContext of downloadLinksWithContext) {
                 try {
-                    const success = await downloadFile(link, downloadDir);
-                    if (success) {
-                        console.log(`Downloaded: ${link}`);
-                        statsManager.incrementDownloaded();
-                    } else {
-                        statsManager.incrementErrors();
+                    let shouldDownload = true;
+                    let aiDecision = null;
+
+                    // AI Pre-Filtering
+                    if (aiPreFilter) {
+                        const context: LinkContext = {
+                            url: linkContext.url,
+                            linkText: linkContext.linkText,
+                            surroundingText: linkContext.surroundingText,
+                            pageTitle: title,
+                            anchorAttributes: linkContext.anchorAttributes
+                        };
+
+                        aiDecision = await aiPreFilter.shouldDownload(context);
+                        shouldDownload = aiDecision.shouldDownload;
+
+                        // Update AI filter statistics
+                        statsManager.updateAIFilterStats(shouldDownload, aiDecision.confidence);
+
+                        if (config.aiPreFilter?.logDecisions) {
+                            const icon = shouldDownload ? '✅' : '❌';
+                            log.info(
+                                `${icon} AI Decision [${(aiDecision.confidence * 100).toFixed(0)}%]: ${linkContext.url}\n` +
+                                `   Reason: ${aiDecision.reasoning}\n` +
+                                `   Subject: ${aiDecision.detectedSubject || 'N/A'}, Grade: ${aiDecision.detectedGrade || 'N/A'}`
+                            );
+                        }
+
+                        // Track filtered files
+                        if (!shouldDownload) {
+                            statsManager.incrementFiltered();
+                        }
+                    }
+
+                    // Download only if AI approved (or AI disabled)
+                    if (shouldDownload) {
+                        const success = await downloadFile(linkContext.url, downloadDir);
+                        if (success) {
+                            console.log(`✅ Downloaded: ${linkContext.url}`);
+                            statsManager.incrementDownloaded();
+                        } else {
+                            statsManager.incrementErrors();
+                        }
                     }
                 } catch (error) {
-                    log.error(`Failed to download ${link}:`, error);
+                    log.error(`Failed to process ${linkContext.url}:`, error);
                     statsManager.incrementErrors();
                 }
             }

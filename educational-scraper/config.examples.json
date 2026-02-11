@@ -1,0 +1,229 @@
+{
+  "_comment": "AI Pre-Filter Configuration Examples - Copy the configuration you need into config.json",
+  
+  "example1_mathematics_only": {
+    "description": "Download only Mathematics resources (all grades)",
+    "config": {
+      "geminiApiKey": "YOUR_API_KEY",
+      "startUrls": ["https://syllabusgh.com/", "https://nacca.gov.gh"],
+      "aiPreFilter": {
+        "enabled": true,
+        "targetSubjects": ["Mathematics"],
+        "targetGrades": [],
+        "minConfidence": 0.7,
+        "enableCaching": true,
+        "logDecisions": true
+      }
+    }
+  },
+
+  "example2_shs_sciences": {
+    "description": "Download Physics, Chemistry, Biology for SHS only",
+    "config": {
+      "geminiApiKey": "YOUR_API_KEY",
+      "startUrls": ["https://curriculumresources.edu.gh"],
+      "aiPreFilter": {
+        "enabled": true,
+        "targetSubjects": ["Physics", "Chemistry", "Biology"],
+        "targetGrades": ["SHS1", "SHS2", "SHS3"],
+        "minConfidence": 0.65,
+        "enableCaching": true,
+        "logDecisions": true
+      }
+    }
+  },
+
+  "example3_bece_prep": {
+    "description": "Download all BECE/JHS3 exam preparation materials",
+    "config": {
+      "geminiApiKey": "YOUR_API_KEY",
+      "startUrls": ["https://passco.com.gh", "https://ghlearner.com"],
+      "aiPreFilter": {
+        "enabled": true,
+        "targetSubjects": [],
+        "targetGrades": ["JHS3", "BECE"],
+        "minConfidence": 0.6,
+        "enableCaching": true,
+        "logDecisions": true
+      }
+    }
+  },
+
+  "example4_jhs_core_subjects": {
+    "description": "Download core JHS subjects (Math, English, Science, Social Studies)",
+    "config": {
+      "geminiApiKey": "YOUR_API_KEY",
+      "startUrls": ["https://mingycomputersgh.wordpress.com"],
+      "aiPreFilter": {
+        "enabled": true,
+        "targetSubjects": [
+          "Mathematics",
+          "English Language",
+          "Science",
+          "Social Studies"
+        ],
+        "targetGrades": ["JHS1", "JHS2", "JHS3"],
+        "minConfidence": 0.65,
+        "enableCaching": true,
+        "logDecisions": true
+      }
+    }
+  },
+
+  "example5_quality_filter_only": {
+    "description": "No subject/grade restrictions, but high quality threshold",
+    "config": {
+      "geminiApiKey": "YOUR_API_KEY",
+      "startUrls": ["https://syllabusgh.com/"],
+      "aiPreFilter": {
+        "enabled": true,
+        "targetSubjects": [],
+        "targetGrades": [],
+        "minConfidence": 0.8,
+        "enableCaching": true,
+        "logDecisions": false
+      }
+    }
+  },
+
+  "example6_wassce_focused": {
+    "description": "SHS3/WASSCE materials for exam subjects",
+    "config": {
+      "geminiApiKey": "YOUR_API_KEY",
+      "startUrls": ["https://passco.com.gh"],
+      "aiPreFilter": {
+        "enabled": true,
+        "targetSubjects": [
+          "Mathematics",
+          "English Language",
+          "Physics",
+          "Chemistry",
+          "Biology",
+          "Economics"
+        ],
+        "targetGrades": ["SHS3", "WASSCE"],
+        "minConfidence": 0.7,
+        "enableCaching": true,
+        "logDecisions": true
+      }
+    }
+  },
+
+  "example7_creative_arts": {
+    "description": "Creative Arts and Design subjects for all levels",
+    "config": {
+      "geminiApiKey": "YOUR_API_KEY",
+      "startUrls": ["https://curriculumresources.edu.gh"],
+      "aiPreFilter": {
+        "enabled": true,
+        "targetSubjects": [
+          "Creative Arts",
+          "Design",
+          "Graphic Design",
+          "Music",
+          "Picture Making",
+          "Sculpture",
+          "Ceramics"
+        ],
+        "targetGrades": [],
+        "minConfidence": 0.65,
+        "enableCaching": true,
+        "logDecisions": true
+      }
+    }
+  },
+
+  "example8_technical_vocational": {
+    "description": "Technical and vocational subjects for SHS",
+    "config": {
+      "geminiApiKey": "YOUR_API_KEY",
+      "startUrls": ["https://nacca.gov.gh"],
+      "aiPreFilter": {
+        "enabled": true,
+        "targetSubjects": [
+          "Applied Electricity",
+          "Auto Mechanics",
+          "Building Construction",
+          "Electronics",
+          "Metalwork",
+          "Woodwork",
+          "Technical Drawing"
+        ],
+        "targetGrades": ["SHS1", "SHS2", "SHS3"],
+        "minConfidence": 0.65,
+        "enableCaching": true,
+        "logDecisions": true
+      }
+    }
+  },
+
+  "example9_business_studies": {
+    "description": "Business and accounting subjects",
+    "config": {
+      "geminiApiKey": "YOUR_API_KEY",
+      "startUrls": ["https://syllabusgh.com/"],
+      "aiPreFilter": {
+        "enabled": true,
+        "targetSubjects": [
+          "Business Management",
+          "Financial Accounting",
+          "Cost Accounting",
+          "Economics"
+        ],
+        "targetGrades": ["SHS1", "SHS2", "SHS3"],
+        "minConfidence": 0.7,
+        "enableCaching": true,
+        "logDecisions": true
+      }
+    }
+  },
+
+  "example10_lenient_collection": {
+    "description": "Cast a wide net with lenient filtering",
+    "config": {
+      "geminiApiKey": "YOUR_API_KEY",
+      "startUrls": [
+        "https://mingycomputersgh.wordpress.com",
+        "https://syllabusgh.com/",
+        "https://nacca.gov.gh",
+        "https://curriculumresources.edu.gh"
+      ],
+      "aiPreFilter": {
+        "enabled": true,
+        "targetSubjects": [],
+        "targetGrades": [],
+        "minConfidence": 0.5,
+        "enableCaching": true,
+        "logDecisions": false
+      },
+      "maxConcurrency": 3
+    }
+  },
+
+  "example11_strict_high_quality": {
+    "description": "Very strict filtering - only highly confident matches",
+    "config": {
+      "geminiApiKey": "YOUR_API_KEY",
+      "startUrls": ["https://syllabusgh.com/"],
+      "aiPreFilter": {
+        "enabled": true,
+        "targetSubjects": ["Mathematics", "Physics"],
+        "targetGrades": ["SHS2", "SHS3"],
+        "minConfidence": 0.85,
+        "enableCaching": true,
+        "logDecisions": true
+      }
+    }
+  },
+
+  "example12_disabled_for_comparison": {
+    "description": "AI Pre-Filter disabled - download everything (baseline)",
+    "config": {
+      "geminiApiKey": "YOUR_API_KEY",
+      "startUrls": ["https://syllabusgh.com/"],
+      "aiPreFilter": {
+        "enabled": false
+      }
+    }
+  }
+}
