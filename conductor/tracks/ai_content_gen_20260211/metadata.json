@@ -1,0 +1,8 @@
+﻿{
+  "track_id": "ai_content_gen_20260211",
+  "type": "feature",
+  "status": "new",
+  "created_at": "2026-02-11T05:14:16Z",
+  "updated_at": "2026-02-11T05:14:16Z",
+  "description": "Implement AI-powered generation of lesson notes and examination papers based on GES curriculum and WAEC past papers."
+}
