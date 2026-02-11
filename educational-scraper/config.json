@@ -79,10 +79,7 @@
         "zip",
         "ppt",
         "pptx",
-        "txt",
-        "jpg",
-        "jpeg",
-        "png"
+        "txt"
     ],
     "downloadFolder": "downloads",
     "headless": true,
