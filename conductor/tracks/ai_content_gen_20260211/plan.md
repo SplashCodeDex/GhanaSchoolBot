@@ -4,7 +4,7 @@
 - [x] Task: Create educational-scraper/src/utils/ai-generator-service.ts scaffold. (4243aff)
 - [x] Task: Write Tests - Verify Gemini initialization and basic text generation. (c68fcbf)
 - [x] Task: Implement Feature - Basic AIGeneratorService with Gemini integration. (0a59afa)
-- [ ] Task: Write Tests - Verify prompt template construction for Lesson Notes.
+- [x] Task: Write Tests - Verify prompt template construction for Lesson Notes. (8e19149)
 - [ ] Task: Implement Feature - generateLessonNotePrompt logic.
 - [ ] Task: Write Tests - Verify prompt template construction for Examinations.
 - [ ] Task: Implement Feature - generateExamPrompt logic.
