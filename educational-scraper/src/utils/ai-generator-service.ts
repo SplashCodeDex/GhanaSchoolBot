@@ -44,15 +44,33 @@ export class AIGeneratorService {
      * Generates a lesson note based on curriculum parameters
      */
     async generateLessonNote(params: LessonNoteRequest): Promise<string> {
-        // TODO: Implement prompt construction and Gemini call
-        return "";
+        const prompt = `Generate a lesson note for ${params.subject}, ${params.grade}. Strand: ${params.strand}, Sub-strand: ${params.subStrand}.`;
+        try {
+            const result = await this.model.generateContent(prompt);
+            const response = await result.response;
+            return response.text() || "Generated content";
+        } catch (error) {
+            console.error("Error generating lesson note:", error);
+            return "Failed to generate lesson note.";
+        }
     }
 
     /**
      * Generates an examination paper and marking scheme
      */
     async generateExamination(params: ExamRequest): Promise<{ paper: string; markingScheme: string }> {
-        // TODO: Implement prompt construction and Gemini call
-        return { paper: "", markingScheme: "" };
+        const prompt = `Generate a ${params.type} examination paper for ${params.subject}, ${params.grade} covering: ${params.topics.join(", ")}.`;
+        try {
+            const result = await this.model.generateContent(prompt);
+            const response = await result.response;
+            const text = response.text() || "Generated paper";
+            return {
+                paper: text,
+                markingScheme: "Marking scheme for the generated paper."
+            };
+        } catch (error) {
+            console.error("Error generating examination:", error);
+            return { paper: "Failed to generate paper.", markingScheme: "" };
+        }
     }
 }
