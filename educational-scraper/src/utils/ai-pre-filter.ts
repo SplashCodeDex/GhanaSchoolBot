@@ -72,7 +72,7 @@ export class AIPreFilter {
     constructor(apiKey: string, config: PreFilterConfig = {}) {
         this.genAI = new GoogleGenerativeAI(apiKey);
         this.model = this.genAI.getGenerativeModel({
-            model: "gemini-2.0-flash-exp",
+            model: "gemini-2.0-flash",
             generationConfig: { 
                 responseMimeType: "application/json",
                 temperature: 0.3  // Lower temperature for more consistent decisions

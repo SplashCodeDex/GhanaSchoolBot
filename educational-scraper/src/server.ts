@@ -9,6 +9,7 @@ import fs from 'fs';
 import { StatsManager } from './utils/stats-manager';
 import { scanDirectory } from './utils/file-scanner';
 import { AIPdfAnalyzer } from './utils/ai-pdf-analyzer';
+import { AIGeneratorService } from './utils/ai-generator-service';
 
 const app = express();
 const PORT = 3001;
@@ -122,12 +123,6 @@ const spawnBackgroundTask = (scriptName: string, name: string, onDone: (code: nu
 // Initialize stats manager
 const statsManager = new StatsManager();
 
-// Update file count periodically
-setInterval(() => {
-    const downloadsDir = path.resolve(__dirname, '../downloads');
-    statsManager.updateFileCount(downloadsDir);
-}, 10000); // Every 10 seconds
-
 // --- Endpoints ---
 
 app.get('/api/files', (req, res) => {
@@ -147,6 +142,43 @@ app.get('/api/stats', (req, res) => {
 
 // Initialize AI PDF Analyzer
 const pdfAnalyzer = new AIPdfAnalyzer(config.geminiApiKey, downloadsPath);
+
+// Initialize AI Generator Service
+const aiGenerator = new AIGeneratorService(config.geminiApiKey);
+
+app.post('/api/ai/generate-lesson-note', async (req, res) => {
+    try {
+        const { subject, grade, strand, subStrand, additionalInstructions } = req.body;
+        if (!subject || !grade || !strand || !subStrand) {
+            return res.status(400).json({ error: 'Missing required curriculum parameters' });
+        }
+
+        const note = await aiGenerator.generateLessonNote({
+            subject, grade, strand, subStrand, additionalInstructions
+        });
+        res.json({ note });
+    } catch (error: any) {
+        console.error('[API] Lesson note generation error:', error.message);
+        res.status(500).json({ error: 'Failed to generate lesson note' });
+    }
+});
+
+app.post('/api/ai/generate-exam', async (req, res) => {
+    try {
+        const { type, subject, grade, topics, numQuestions } = req.body;
+        if (!type || !subject || !grade || !topics || !numQuestions) {
+            return res.status(400).json({ error: 'Missing required examination parameters' });
+        }
+
+        const result = await aiGenerator.generateExamination({
+            type, subject, grade, topics, numQuestions
+        });
+        res.json(result);
+    } catch (error: any) {
+        console.error('[API] Examination generation error:', error.message);
+        res.status(500).json({ error: 'Failed to generate examination' });
+    }
+});
 
 app.post('/api/analyze', async (req, res) => {
     const { filePath } = req.body;
@@ -365,6 +397,16 @@ io.on('connection', (socket) => {
     });
 });
 
-server.listen(PORT, () => {
-    console.log(`Server API running on http://localhost:${PORT}`);
-});
+export { app };
+
+if (require.main === module) {
+    // Update file count periodically
+    setInterval(() => {
+        const downloadsDir = path.resolve(__dirname, '../downloads');
+        statsManager.updateFileCount(downloadsDir);
+    }, 10000); // Every 10 seconds
+
+    server.listen(PORT, () => {
+        console.log(`Server API running on http://localhost:${PORT}`);
+    });
+}
