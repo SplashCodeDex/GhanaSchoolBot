@@ -1,0 +1,8 @@
+﻿{
+  "track_id": "dynamic_curriculum_kb_20260211",
+  "type": "feature",
+  "status": "new",
+  "created_at": "2026-02-11T07:19:27Z",
+  "updated_at": "2026-02-11T07:19:27Z",
+  "description": "Create a subject-agnostic curriculum knowledge base (JSON) and implement dynamic discovery and search features in the dashboard."
+}
