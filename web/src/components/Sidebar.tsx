@@ -8,6 +8,7 @@ import {
     BookOpen,
     ClipboardCheck,
     FileEdit,
+    MessageSquare,
     ChevronLeft,
     ChevronRight
 } from 'lucide-react';
@@ -39,6 +40,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         { id: 'resources', label: 'Resources', icon: Files },
         { id: 'lesson-notes', label: 'Lesson Notes', icon: FileEdit },
         { id: 'exams', label: 'Exam Builder', icon: ClipboardCheck },
+        { id: 'chatbot', label: 'AI Assistant', icon: MessageSquare },
         { id: 'settings', label: 'Settings', icon: Settings }
     ];
 

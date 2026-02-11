@@ -180,6 +180,32 @@ app.post('/api/ai/generate-exam', async (req, res) => {
     }
 });
 
+app.post('/api/ai/chat', async (req, res) => {
+    try {
+        const { message } = req.body;
+        if (!message) {
+            return res.status(400).json({ error: 'Message is required' });
+        }
+
+        // We'll use a direct call to the model for now, could be moved to AIGeneratorService
+        const prompt = `You are an expert AI educational assistant for the Ghana School Bot platform. 
+        Your goal is to help teachers and students with curriculum questions, lesson planning, and understanding educational concepts.
+        
+        User Question: ${message}
+        
+        Provide a helpful, accurate, and concise response.`;
+
+        const result = await aiGenerator['model'].generateContent(prompt);
+        const response = await result.response;
+        const text = response.text() || "I couldn't generate a response.";
+        
+        res.json({ response: text });
+    } catch (error: any) {
+        console.error('[API] Chat error:', error.message);
+        res.status(500).json({ error: 'Failed to process chat message' });
+    }
+});
+
 app.post('/api/ai/save', async (req, res) => {
     try {
         const { filename, content, type } = req.body;

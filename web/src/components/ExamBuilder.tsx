@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ClipboardCheck, Sparkles, AlertCircle, Loader2, Save, FileText, CheckCircle2 } from 'lucide-react';
+import { ClipboardCheck, Sparkles, AlertCircle, Loader2, Save, FileText, CheckCircle2, Download as DownloadIcon } from 'lucide-react';
 import { useAIGeneration } from '../hooks/useAIGeneration';
 import type { ExamRequest } from '../hooks/useAIGeneration';
 import { ContentPreview } from './ContentPreview';
@@ -65,6 +65,18 @@ export const ExamBuilder: React.FC = () => {
         } catch (err) {
             console.error(err);
         }
+    };
+
+    const handleExport = (content: string, subType: 'Paper' | 'Scheme') => {
+        const blob = new Blob([content], { type: 'text/markdown' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${formData.type}_${formData.subject}_${formData.grade}_${subType}.md`.replace(/\s+/g, '_');
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
     };
 
     return (
@@ -209,10 +221,16 @@ export const ExamBuilder: React.FC = () => {
                                 <FileText size={18} style={{ color: 'var(--accent-primary)' }} />
                                 <h3 style={{ fontSize: '15px', fontWeight: 600, margin: 0 }}>Question Paper</h3>
                             </div>
-                            <button className="btn btn-primary" onClick={() => handleSave(generatedExam.paper, 'Paper')}>
-                                <Save size={14} />
-                                Save Paper
-                            </button>
+                            <div style={{ display: 'flex', gap: '8px' }}>
+                                <button className="btn" onClick={() => handleExport(generatedExam.paper, 'Paper')} style={{ background: 'var(--bg-surface-elevated)' }}>
+                                    <DownloadIcon size={14} />
+                                    Export
+                                </button>
+                                <button className="btn btn-primary" onClick={() => handleSave(generatedExam.paper, 'Paper')}>
+                                    <Save size={14} />
+                                    Save
+                                </button>
+                            </div>
                         </div>
                         <ContentPreview content={generatedExam.paper} />
                     </div>
@@ -223,10 +241,16 @@ export const ExamBuilder: React.FC = () => {
                                 <CheckCircle2 size={18} style={{ color: 'var(--success)' }} />
                                 <h3 style={{ fontSize: '15px', fontWeight: 600, margin: 0 }}>Marking Scheme</h3>
                             </div>
-                            <button className="btn" style={{ background: 'var(--bg-surface-elevated)' }} onClick={() => handleSave(generatedExam.markingScheme, 'Scheme')}>
-                                <Save size={14} />
-                                Save Scheme
-                            </button>
+                            <div style={{ display: 'flex', gap: '8px' }}>
+                                <button className="btn" onClick={() => handleExport(generatedExam.markingScheme, 'Scheme')} style={{ background: 'var(--bg-surface-elevated)' }}>
+                                    <DownloadIcon size={14} />
+                                    Export
+                                </button>
+                                <button className="btn btn-primary" style={{ background: 'var(--success)' }} onClick={() => handleSave(generatedExam.markingScheme, 'Scheme')}>
+                                    <Save size={14} />
+                                    Save
+                                </button>
+                            </div>
                         </div>
                         <ContentPreview content={generatedExam.markingScheme} />
                     </div>

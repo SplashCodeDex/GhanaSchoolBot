@@ -155,9 +155,10 @@ export class AIPreFilter {
                 };
 
                 // Apply confidence threshold
-                if (decision.confidence < this.config.minConfidence) {
+                const minConf = this.config.minConfidence ?? 0.6;
+                if (decision.confidence < minConf) {
                     decision.shouldDownload = false;
-                    decision.reasoning += ` (Confidence ${decision.confidence.toFixed(2)} below threshold ${this.config.minConfidence})`;
+                    decision.reasoning += ` (Confidence ${decision.confidence.toFixed(2)} below threshold ${minConf})`;
                 }
 
                 // Cache the result

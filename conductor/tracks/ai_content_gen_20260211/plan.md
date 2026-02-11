@@ -35,3 +35,11 @@
 - [x] Task: Create persistence logic (e.g., local storage or simple backend save) for generated content. (0636c62)
 - [x] Task: Implement Feature - 'Save for later' and 'Export' functionality. (ea5c6b1)
 - [~] Task: Conductor - User Manual Verification 'Phase 4: Final Polish and Export' (Protocol in workflow.md)
+
+## Phase 5: User Feedback Integration & Polish
+- [~] Task: Fix Sidebar navigation logic to ensure all tabs (including new AI tools) work seamlessly.
+- [x] Task: Implement 'Chat Bot' tab for general AI assistance using the existing AI service.
+- [x] Task: Add 'Sync to Drive' controls to the UI (linking to existing backend endpoints).
+- [x] Task: Polish 'Save' and 'Export' buttons in Lesson Note and Exam builders to match design system.
+- [~] Task: Verify 'Review Queue' visibility in FileManager or Filter Panel.
+- [x] Task: Conductor - User Manual Verification 'Phase 5: User Feedback Integration' (Protocol in workflow.md)

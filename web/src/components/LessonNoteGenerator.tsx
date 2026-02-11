@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import { BookOpen, Sparkles, AlertCircle, Loader2, Save, FileText } from 'lucide-react';
+import { BookOpen, Sparkles, AlertCircle, Loader2, Save, FileText, Download as DownloadIcon, CheckCircle2 } from 'lucide-react';
 import { useAIGeneration } from '../hooks/useAIGeneration';
-import type { LessonNoteRequest } from '../hooks/useAIGeneration';
 import { ContentPreview } from './ContentPreview';
 
 export const LessonNoteGenerator: React.FC = () => {
@@ -49,6 +48,19 @@ export const LessonNoteGenerator: React.FC = () => {
         } catch (err) {
             console.error(err);
         }
+    };
+
+    const handleExport = () => {
+        if (!generatedNote) return;
+        const blob = new Blob([generatedNote], { type: 'text/markdown' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `LessonNote_${formData.subject}_${formData.grade}.md`.replace(/\s+/g, '_');
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
     };
 
     return (
@@ -191,6 +203,10 @@ export const LessonNoteGenerator: React.FC = () => {
                             <h3 style={{ fontSize: '15px', fontWeight: 600, margin: 0 }}>Generated Preview</h3>
                         </div>
                         <div style={{ display: 'flex', gap: '8px' }}>
+                            <button className="btn" onClick={handleExport} style={{ background: 'var(--bg-surface-elevated)' }}>
+                                <DownloadIcon size={14} />
+                                Export MD
+                            </button>
                             <button className="btn btn-primary" onClick={handleSave} style={{ background: 'var(--success)' }}>
                                 <Save size={14} />
                                 Save Note

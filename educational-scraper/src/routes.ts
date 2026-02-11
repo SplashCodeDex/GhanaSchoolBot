@@ -115,7 +115,10 @@ router.addDefaultHandler(async ({ page, enqueueLinks, log, request }) => {
                         }
                     }
                 } catch (error) {
-                    log.error(`Failed to process ${linkContext.url}:`, error);
+                    const details: Record<string, unknown> = error instanceof Error
+                        ? { name: error.name, message: error.message, stack: error.stack }
+                        : { value: String(error) };
+                    log.error(`Failed to process ${linkContext.url}: ${details.message ?? details.value}`);
                     statsManager.incrementErrors();
                 }
             }
@@ -139,7 +142,10 @@ router.addDefaultHandler(async ({ page, enqueueLinks, log, request }) => {
         statsManager.incrementUrlsProcessed(true);
         
     } catch (error) {
-        log.error(`Error processing ${request.url}:`, error);
+        const details: Record<string, unknown> = error instanceof Error
+            ? { name: error.name, message: error.message, stack: error.stack }
+            : { value: String(error) };
+        log.error(`Error processing ${request.url}: ${details.message ?? details.value}`);
         statsManager.incrementUrlsProcessed(false);
         statsManager.incrementErrors();
         throw error; // Re-throw to let Crawlee handle retries

@@ -30,7 +30,8 @@ interface FileTreeItemProps {
 }
 
 const FileTreeItem: React.FC<FileTreeItemProps> = ({ item, onPreview, onAnalyze, isAnalyzing }) => {
-    const [isOpen, setIsOpen] = useState(false);
+    const isReviewQueue = item.name === 'Review_Needed';
+    const [isOpen, setIsOpen] = useState(isReviewQueue); // Auto-expand review queue
 
     if (item.type === 'directory') {
         return (
@@ -41,18 +42,21 @@ const FileTreeItem: React.FC<FileTreeItemProps> = ({ item, onPreview, onAnalyze,
                     style={{
                         width: '100%',
                         justifyContent: 'flex-start',
-                        background: 'transparent',
+                        background: isReviewQueue ? 'rgba(245, 158, 11, 0.1)' : 'transparent',
                         border: 'none',
                         padding: '6px 8px',
                         borderBottom: '1px solid var(--border-muted)',
-                        borderRadius: 0
+                        borderRadius: 0,
+                        borderLeft: isReviewQueue ? '3px solid var(--warning)' : '3px solid transparent'
                     }}
                 >
                     <span style={{ marginRight: '4px' }}>
                         {isOpen ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
                     </span>
-                    <Folder size={16} style={{ marginRight: '8px', color: 'var(--accent-secondary)' }} />
-                    <span style={{ fontSize: '13px', fontWeight: 500 }}>{item.name}</span>
+                    <Folder size={16} style={{ marginRight: '8px', color: isReviewQueue ? 'var(--warning)' : 'var(--accent-secondary)' }} />
+                    <span style={{ fontSize: '13px', fontWeight: 500, color: isReviewQueue ? 'var(--warning)' : 'inherit' }}>
+                        {item.name} {isReviewQueue && '(Action Required)'}
+                    </span>
                 </div>
                 {isOpen && item.children && (
                     <div style={{ marginLeft: '12px', borderLeft: '1px solid var(--border-muted)' }}>

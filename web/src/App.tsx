@@ -22,6 +22,7 @@ import { AIConfigPanel } from './components/AIConfigPanel';
 import { Sidebar } from './components/Sidebar';
 import { LessonNoteGenerator } from './components/LessonNoteGenerator';
 import { ExamBuilder } from './components/ExamBuilder';
+import { ChatBot } from './components/ChatBot';
 import { useAnalysis } from './hooks/useAnalysis';
 
 // Define the shape of our stats
@@ -65,7 +66,7 @@ interface FileItem {
 
 const API_URL = 'http://localhost:3001';
 
-type TabType = 'overview' | 'process' | 'resources' | 'settings' | 'lesson-notes' | 'exams';
+type TabType = 'overview' | 'process' | 'resources' | 'settings' | 'lesson-notes' | 'exams' | 'chatbot';
 
 function App() {
   const [, setSocket] = useState<Socket | null>(null);
@@ -328,6 +329,10 @@ function App() {
 
           {activeTab === 'exams' && (
             <ExamBuilder />
+          )}
+
+          {activeTab === 'chatbot' && (
+            <ChatBot />
           )}
 
           {activeTab === 'settings' && (
