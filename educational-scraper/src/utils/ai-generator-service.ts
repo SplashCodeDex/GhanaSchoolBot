@@ -77,15 +77,42 @@ Please format the output in Markdown.
      * Generates an examination paper and marking scheme
      */
     async generateExamination(params: ExamRequest): Promise<{ paper: string; markingScheme: string }> {
-        const prompt = `Generate a ${params.type} examination paper for ${params.subject}, ${params.grade} covering: ${params.topics.join(", ")}.`;
+        const prompt = `
+You are an expert examiner in Ghana. Generate a ${params.type} examination paper following WAEC and GES standards.
+
+SUBJECT: ${params.subject}
+GRADE: ${params.grade}
+TOPICS: ${params.topics.join(", ")}
+NUMBER OF QUESTIONS: ${params.numQuestions}
+
+REQUIREMENTS:
+1. **Section A**: Multiple choice questions with 4 options each.
+2. **Section B**: Theory/Structured questions based on the topics.
+3. **Marking Scheme**: Provide a detailed marking scheme for all questions at the end, clearly separated.
+
+Please format the output as a JSON object with two fields: "paper" (the exam questions in Markdown) and "markingScheme" (the answers and marks allocation in Markdown).
+        `.trim();
+
         try {
+            // Update model to use JSON response if possible, otherwise parse manually
             const result = await this.model.generateContent(prompt);
             const response = await result.response;
-            const text = response.text() || "Generated paper";
-            return {
-                paper: text,
-                markingScheme: "Marking scheme for the generated paper."
-            };
+            const text = response.text() || "{}";
+            
+            try {
+                // Try to parse as JSON if the model followed instructions
+                const data = JSON.parse(text);
+                return {
+                    paper: data.paper || text,
+                    markingScheme: data.markingScheme || "Marking scheme not provided."
+                };
+            } catch {
+                // Fallback for non-JSON response
+                return {
+                    paper: text,
+                    markingScheme: "Marking scheme included in the paper text."
+                };
+            }
         } catch (error) {
             console.error("Error generating examination:", error);
             return { paper: "Failed to generate paper.", markingScheme: "" };

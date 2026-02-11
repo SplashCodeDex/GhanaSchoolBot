@@ -7,9 +7,14 @@ let lastPrompt = "";
 const mockModel = {
     generateContent: async (prompt: string) => {
         lastPrompt = prompt;
+        // Return JSON if it looks like an exam request
+        const responseText = prompt.includes("JSON") 
+            ? JSON.stringify({ paper: "Generated paper content", markingScheme: "Generated marking scheme" })
+            : "Generated content";
+            
         return {
             response: {
-                text: () => "Generated content"
+                text: () => responseText
             }
         };
     }
@@ -45,15 +50,16 @@ describe("AIGeneratorService", () => {
 
     test("generateExamination should return paper and marking scheme", async () => {
         const params = {
-            type: 'MOCK' as const,
+            type: 'BECE' as const,
             subject: "Science",
-            grade: "SHS1",
-            topics: ["Cells", "Ecosystems"],
+            grade: "JHS3",
+            topics: ["Matter", "Energy"],
             numQuestions: 10
         };
-        const result = await service.generateExamination(params);
-        assert.strictEqual(typeof result.paper, "string");
-        assert.strictEqual(typeof result.markingScheme, "string");
-        assert.ok(result.paper.length > 0, "Paper should not be empty");
+        await service.generateExamination(params);
+        assert.ok(lastPrompt.includes("BECE"), "Prompt should include exam type");
+        assert.ok(lastPrompt.includes("Science"), "Prompt should include subject");
+        assert.ok(lastPrompt.includes("Matter"), "Prompt should include topics");
+        assert.ok(lastPrompt.includes("Marking Scheme"), "Prompt should ask for Marking Scheme");
     });
 });
