@@ -1,6 +1,6 @@
 ﻿# Implementation Plan: AI Lesson Note and Examination Generation
 
-## Phase 1: AI Service Foundation (Gemini Integration)
+## Phase 1: AI Service Foundation (Gemini Integration) [checkpoint: 9460e45]
 - [x] Task: Create educational-scraper/src/utils/ai-generator-service.ts scaffold. (4243aff)
 - [x] Task: Write Tests - Verify Gemini initialization and basic text generation. (c68fcbf)
 - [x] Task: Implement Feature - Basic AIGeneratorService with Gemini integration. (0a59afa)
