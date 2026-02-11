@@ -5,7 +5,8 @@ import type { LessonNoteRequest } from '../hooks/useAIGeneration';
 import { ContentPreview } from './ContentPreview';
 
 export const LessonNoteGenerator: React.FC = () => {
-    const { loading, error, generatedNote, generateLessonNote, reset } = useAIGeneration();
+    const { loading, error, generatedNote, generateLessonNote, saveContent, reset } = useAIGeneration();
+    const [savedStatus, setSavedStatus] = useState<string | null>(null);
     
     const [formData, setFormData] = useState({
         subject: '',
@@ -30,8 +31,21 @@ export const LessonNoteGenerator: React.FC = () => {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        setSavedStatus(null);
         try {
             await generateLessonNote(formData);
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
+    const handleSave = async () => {
+        if (!generatedNote) return;
+        try {
+            const filename = `${formData.subject}_${formData.grade}_${formData.strand}`.replace(/\s+/g, '_');
+            await saveContent(filename, generatedNote, 'lesson-notes');
+            setSavedStatus('Lesson note saved successfully!');
+            setTimeout(() => setSavedStatus(null), 3000);
         } catch (err) {
             console.error(err);
         }
@@ -142,7 +156,7 @@ export const LessonNoteGenerator: React.FC = () => {
                     </div>
 
                     <div style={{ gridColumn: 'span 2', display: 'flex', justifyContent: 'flex-end', gap: 'var(--space-md)', marginTop: 'var(--space-sm)' }}>
-                        <button type="button" onClick={reset} className="btn" disabled={loading}>Reset</button>
+                        <button type="button" onClick={() => { reset(); setSavedStatus(null); }} className="btn" disabled={loading}>Reset</button>
                         <button type="submit" className="btn btn-primary" disabled={loading}>
                             {loading ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
                             {loading ? 'Generating...' : 'Generate Lesson Note'}
@@ -160,6 +174,15 @@ export const LessonNoteGenerator: React.FC = () => {
                 </div>
             )}
 
+            {savedStatus && (
+                <div className="card" style={{ borderColor: 'var(--success)', background: 'rgba(16, 185, 129, 0.05)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--success)' }}>
+                        <CheckCircle2 size={18} />
+                        <span style={{ fontSize: '14px', fontWeight: 500 }}>{savedStatus}</span>
+                    </div>
+                </div>
+            )}
+
             {generatedNote && (
                 <div className="card area-scroll" style={{ flex: 1, position: 'relative' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-md)', position: 'sticky', top: 0, background: 'var(--bg-surface)', zIndex: 1, padding: '4px 0' }}>
@@ -168,7 +191,7 @@ export const LessonNoteGenerator: React.FC = () => {
                             <h3 style={{ fontSize: '15px', fontWeight: 600, margin: 0 }}>Generated Preview</h3>
                         </div>
                         <div style={{ display: 'flex', gap: '8px' }}>
-                            <button className="btn btn-primary" style={{ background: 'var(--success)' }}>
+                            <button className="btn btn-primary" onClick={handleSave} style={{ background: 'var(--success)' }}>
                                 <Save size={14} />
                                 Save Note
                             </button>

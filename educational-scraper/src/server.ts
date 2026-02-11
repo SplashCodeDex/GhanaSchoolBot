@@ -180,6 +180,29 @@ app.post('/api/ai/generate-exam', async (req, res) => {
     }
 });
 
+app.post('/api/ai/save', async (req, res) => {
+    try {
+        const { filename, content, type } = req.body;
+        if (!filename || !content || !type) {
+            return res.status(400).json({ error: 'Missing save parameters' });
+        }
+
+        const saveDir = path.resolve(__dirname, `../generated/${type}`);
+        if (!fs.existsSync(saveDir)) {
+            fs.mkdirSync(saveDir, { recursive: true });
+        }
+
+        const safeFilename = filename.replace(/[^a-z0-9]/gi, '_').toLowerCase() + '.md';
+        const fullPath = path.join(saveDir, safeFilename);
+
+        fs.writeFileSync(fullPath, content, 'utf8');
+        res.json({ success: true, path: fullPath });
+    } catch (error: any) {
+        console.error('[API] Save error:', error.message);
+        res.status(500).json({ error: 'Failed to save content' });
+    }
+});
+
 app.post('/api/analyze', async (req, res) => {
     const { filePath } = req.body;
 

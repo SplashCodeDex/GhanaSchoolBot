@@ -87,6 +87,32 @@ export const useAIGeneration = () => {
         }
     }, []);
 
+    const saveContent = useCallback(async (filename: string, content: string, type: 'lesson-notes' | 'exams') => {
+        setLoading(true);
+        setError(null);
+
+        try {
+            const res = await fetch(`${API_URL}/api/ai/save`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ filename, content, type })
+            });
+
+            if (!res.ok) {
+                const errData = await res.json();
+                throw new Error(errData.error || 'Failed to save content');
+            }
+
+            return await res.json();
+        } catch (err) {
+            const msg = err instanceof Error ? err.message : 'Unknown error';
+            setError(msg);
+            throw err;
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
     const reset = useCallback(() => {
         setLoading(false);
         setError(null);
@@ -101,6 +127,7 @@ export const useAIGeneration = () => {
         generatedExam,
         generateLessonNote,
         generateExam,
+        saveContent,
         reset
     };
 };

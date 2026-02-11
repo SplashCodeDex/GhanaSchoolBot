@@ -5,7 +5,8 @@ import type { ExamRequest } from '../hooks/useAIGeneration';
 import { ContentPreview } from './ContentPreview';
 
 export const ExamBuilder: React.FC = () => {
-    const { loading, error, generatedExam, generateExam, reset } = useAIGeneration();
+    const { loading, error, generatedExam, generateExam, saveContent, reset } = useAIGeneration();
+    const [savedStatus, setSavedStatus] = useState<string | null>(null);
     
     const [formData, setFormData] = useState<ExamRequest>({
         type: 'MOCK',
@@ -46,8 +47,21 @@ export const ExamBuilder: React.FC = () => {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        setSavedStatus(null);
         try {
             await generateExam(formData);
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
+    const handleSave = async (content: string, subType: 'Paper' | 'Scheme') => {
+        if (!generatedExam) return;
+        try {
+            const filename = `${formData.type}_${formData.subject}_${formData.grade}_${subType}`.replace(/\s+/g, '_');
+            await saveContent(filename, content, 'exams');
+            setSavedStatus(`${subType} saved successfully!`);
+            setTimeout(() => setSavedStatus(null), 3000);
         } catch (err) {
             console.error(err);
         }
@@ -160,7 +174,7 @@ export const ExamBuilder: React.FC = () => {
                     </div>
 
                     <div style={{ gridColumn: 'span 3', display: 'flex', justifyContent: 'flex-end', gap: 'var(--space-md)', marginTop: 'var(--space-sm)' }}>
-                        <button type="button" onClick={reset} className="btn" disabled={loading}>Reset</button>
+                        <button type="button" onClick={() => { reset(); setSavedStatus(null); }} className="btn" disabled={loading}>Reset</button>
                         <button type="submit" className="btn btn-primary" disabled={loading}>
                             {loading ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
                             {loading ? 'Generating Exam...' : 'Build Examination'}
@@ -178,6 +192,15 @@ export const ExamBuilder: React.FC = () => {
                 </div>
             )}
 
+            {savedStatus && (
+                <div className="card" style={{ borderColor: 'var(--success)', background: 'rgba(16, 185, 129, 0.05)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--success)' }}>
+                        <CheckCircle2 size={18} />
+                        <span style={{ fontSize: '14px', fontWeight: 500 }}>{savedStatus}</span>
+                    </div>
+                </div>
+            )}
+
             {generatedExam && (
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-lg)', flex: 1, minHeight: 0 }}>
                     <div className="card area-scroll" style={{ display: 'flex', flexDirection: 'column' }}>
@@ -186,7 +209,7 @@ export const ExamBuilder: React.FC = () => {
                                 <FileText size={18} style={{ color: 'var(--accent-primary)' }} />
                                 <h3 style={{ fontSize: '15px', fontWeight: 600, margin: 0 }}>Question Paper</h3>
                             </div>
-                            <button className="btn btn-primary">
+                            <button className="btn btn-primary" onClick={() => handleSave(generatedExam.paper, 'Paper')}>
                                 <Save size={14} />
                                 Save Paper
                             </button>
@@ -200,7 +223,7 @@ export const ExamBuilder: React.FC = () => {
                                 <CheckCircle2 size={18} style={{ color: 'var(--success)' }} />
                                 <h3 style={{ fontSize: '15px', fontWeight: 600, margin: 0 }}>Marking Scheme</h3>
                             </div>
-                            <button className="btn" style={{ background: 'var(--bg-surface-elevated)' }}>
+                            <button className="btn" style={{ background: 'var(--bg-surface-elevated)' }} onClick={() => handleSave(generatedExam.markingScheme, 'Scheme')}>
                                 <Save size={14} />
                                 Save Scheme
                             </button>
