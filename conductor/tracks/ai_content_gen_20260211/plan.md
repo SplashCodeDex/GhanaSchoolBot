@@ -25,9 +25,9 @@
 - [x] Task: Implement Feature - useAIGeneration hook with Socket.io/Fetch integration. (a9f5b83)
 - [x] Task: Create web/src/components/LessonNoteGenerator.tsx. (92aee8a)
 - [x] Task: Implement Feature - Form UI for Lesson Note generation. (92aee8a)
-- [~] Task: Create web/src/components/ExamBuilder.tsx.
-- [ ] Task: Implement Feature - Form UI for Exam building.
-- [ ] Task: Conductor - User Manual Verification 'Phase 3: Frontend Integration' (Protocol in workflow.md)
+- [x] Task: Create web/src/components/ExamBuilder.tsx. (b3b5e89)
+- [x] Task: Implement Feature - Form UI for Exam building. (b3b5e89)
+- [~] Task: Conductor - User Manual Verification 'Phase 3: Frontend Integration' (Protocol in workflow.md)
 
 ## Phase 4: Content Preview & Persistence
 - [ ] Task: Create web/src/components/ContentPreview.tsx using a Markdown renderer.
