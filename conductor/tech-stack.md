@@ -1,4 +1,4 @@
-﻿# Technology Stack: Ghana School Bot
+# Technology Stack: Ghana School Bot
 
 ## Core Languages
 - **TypeScript:** Primary language for both backend and frontend, ensuring type safety and maintainability.
@@ -17,7 +17,7 @@
 - **Socket.io:** For broadcasting real-time logs and statistics to the dashboard.
 
 ## AI & Intelligence
-- **Google Gemini API (@google/generative-ai):** Used for AI pre-filtering, resource classification, lesson note generation, and examination building.
+- **Google Gemini API (@google/generative-ai):** Used for AI pre-filtering, resource classification, lesson note generation, examination building, and interactive chat assistance.
 
 ## Infrastructure & Integrations
 - **Google Drive API:** For cloud storage and organization of educational resources.
