@@ -19,7 +19,7 @@
 - [x] Task: Implement Feature - Middleware/Validation for AI routes. (b25ed1b)
 - [x] Task: Conductor - User Manual Verification 'Phase 2: Backend API Implementation' (Protocol in workflow.md)
 
-## Phase 3: Frontend Integration (Core UI)
+## Phase 3: Frontend Integration (Core UI) [checkpoint: 7b876f4]
 - [x] Task: Create web/src/hooks/useAIGeneration.ts for managing generation state. (f2604f6)
 - [x] Task: Write Tests - Verify useAIGeneration hook states (loading, success, error). (a9f5b83)
 - [x] Task: Implement Feature - useAIGeneration hook with Socket.io/Fetch integration. (a9f5b83)
