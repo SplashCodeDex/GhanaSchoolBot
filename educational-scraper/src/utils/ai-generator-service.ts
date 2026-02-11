@@ -44,7 +44,25 @@ export class AIGeneratorService {
      * Generates a lesson note based on curriculum parameters
      */
     async generateLessonNote(params: LessonNoteRequest): Promise<string> {
-        const prompt = `Generate a lesson note for ${params.subject}, ${params.grade}. Strand: ${params.strand}, Sub-strand: ${params.subStrand}.`;
+        const prompt = `
+You are an expert educator in Ghana. Generate a detailed lesson note following the GES curriculum standards.
+
+SUBJECT: ${params.subject}
+GRADE: ${params.grade}
+STRAND: ${params.strand}
+SUB-STRAND: ${params.subStrand}
+${params.additionalInstructions ? `ADDITIONAL INSTRUCTIONS: ${params.additionalInstructions}` : ""}
+
+STRUCTURE:
+1. **Objective**: What the students should achieve by the end of the lesson.
+2. **Introduction**: A brief engaging start to the lesson.
+3. **Main Body**: Detailed delivery of the topic with clear points.
+4. **Conclusion**: Summary of the key takeaways.
+5. **Evaluation**: 3-5 assessment questions to test understanding.
+
+Please format the output in Markdown.
+        `.trim();
+
         try {
             const result = await this.model.generateContent(prompt);
             const response = await result.response;

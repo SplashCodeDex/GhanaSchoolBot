@@ -3,12 +3,16 @@ import assert from "node:assert";
 import { AIGeneratorService } from "./ai-generator-service";
 
 // Mock the GoogleGenerativeAI dependency
+let lastPrompt = "";
 const mockModel = {
-    generateContent: async (prompt: string) => ({
-        response: {
-            text: () => `Generated content for: ${prompt}`
-        }
-    })
+    generateContent: async (prompt: string) => {
+        lastPrompt = prompt;
+        return {
+            response: {
+                text: () => "Generated content"
+            }
+        };
+    }
 };
 
 describe("AIGeneratorService", () => {
@@ -18,22 +22,25 @@ describe("AIGeneratorService", () => {
         service = new AIGeneratorService("test-api-key");
         // Inject mock model
         (service as any).model = mockModel;
+        lastPrompt = "";
     });
 
     test("should be initialized", () => {
         assert.ok(service);
     });
 
-    test("generateLessonNote should return a generated string", async () => {
+    test("generateLessonNote should construct a correct prompt", async () => {
         const params = {
             subject: "Mathematics",
             grade: "JHS1",
             strand: "Number",
             subStrand: "Integers"
         };
-        const result = await service.generateLessonNote(params);
-        assert.strictEqual(typeof result, "string");
-        assert.ok(result.length > 0, "Result should not be empty");
+        await service.generateLessonNote(params);
+        assert.ok(lastPrompt.includes("Mathematics"), "Prompt should include subject");
+        assert.ok(lastPrompt.includes("JHS1"), "Prompt should include grade");
+        assert.ok(lastPrompt.includes("Integers"), "Prompt should include sub-strand");
+        assert.ok(lastPrompt.includes("Objective"), "Prompt should ask for Objective");
     });
 
     test("generateExamination should return paper and marking scheme", async () => {
