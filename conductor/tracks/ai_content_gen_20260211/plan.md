@@ -36,7 +36,7 @@
 - [x] Task: Implement Feature - 'Save for later' and 'Export' functionality. (ea5c6b1)
 - [~] Task: Conductor - User Manual Verification 'Phase 4: Final Polish and Export' (Protocol in workflow.md)
 
-## Phase 5: User Feedback Integration & Polish
+## Phase 5: User Feedback Integration & Polish [checkpoint: d0b8b1a]
 - [~] Task: Fix Sidebar navigation logic to ensure all tabs (including new AI tools) work seamlessly.
 - [x] Task: Implement 'Chat Bot' tab for general AI assistance using the existing AI service.
 - [x] Task: Add 'Sync to Drive' controls to the UI (linking to existing backend endpoints).
