@@ -1,7 +1,7 @@
 ﻿# Implementation Plan: Dynamic Curriculum Knowledge Base
 
 ## Phase 1: Data Architecture & Storage
-- [ ] Task: Create educational-scraper/data/curriculum_kb.json with initial schema and seed data (Sample subjects for Primary, JHS, SHS).
+- [x] Task: Create educational-scraper/data/curriculum_kb.json with initial schema and seed data (Sample subjects for Primary, JHS, SHS). (740d8d8)
 - [ ] Task: Create educational-scraper/src/utils/curriculum-service.ts to handle KB parsing and queries.
 - [ ] Task: Write Tests - Verify CurriculumService correctly retrieves subjects and filters hierarchy.
 - [ ] Task: Implement Feature - CurriculumService core logic.
