@@ -45,9 +45,15 @@ async function main() {
     // Monitor crawler statistics
     setInterval(() => {
         const crawlerStats = crawler.stats;
-        if (crawlerStats) {
-            // Update active threads based on crawler's internal state
-            const activeRequests = crawlerStats.state?.requestsInProgress || 0;
+        if (crawlerStats && crawlerStats.state) {
+            // Calculate active requests from available stats
+            // Active = Total - (Finished + Failed)
+            const state = crawlerStats.state;
+            const activeRequests = Math.max(0, 
+                (state.requestsTotal || 0) - 
+                (state.requestsFinished || 0) - 
+                (state.requestsFailed || 0)
+            );
             statsManager.setActiveThreads(activeRequests);
         }
     }, 2000);

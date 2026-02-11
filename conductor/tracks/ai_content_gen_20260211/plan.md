@@ -17,7 +17,7 @@
 - [x] Task: Implement Feature - Examination generation route in server.ts. (9b85900)
 - [x] Task: Write Tests - Verify input validation for curriculum parameters. (b25ed1b)
 - [x] Task: Implement Feature - Middleware/Validation for AI routes. (b25ed1b)
-- [ ] Task: Conductor - User Manual Verification 'Phase 2: Backend API Implementation' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 2: Backend API Implementation' (Protocol in workflow.md)
 
 ## Phase 3: Frontend Integration (Core UI)
 - [ ] Task: Create web/src/hooks/useAIGeneration.ts for managing generation state.
