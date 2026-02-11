@@ -11,10 +11,10 @@
 - [x] Task: Conductor - User Manual Verification 'Phase 1: AI Service Foundation' (Protocol in workflow.md)
 
 ## Phase 2: Backend API Implementation
-- [ ] Task: Write Tests - Verify /api/ai/generate-lesson-note endpoint response.
-- [ ] Task: Implement Feature - Lesson Note generation route in server.ts.
-- [ ] Task: Write Tests - Verify /api/ai/generate-exam endpoint response.
-- [ ] Task: Implement Feature - Examination generation route in server.ts.
+- [x] Task: Write Tests - Verify /api/ai/generate-lesson-note endpoint response. (d0d21f4)
+- [x] Task: Implement Feature - Lesson Note generation route in server.ts. (9b85900)
+- [x] Task: Write Tests - Verify /api/ai/generate-exam endpoint response. (9b85900)
+- [x] Task: Implement Feature - Examination generation route in server.ts. (9b85900)
 - [ ] Task: Write Tests - Verify input validation for curriculum parameters.
 - [ ] Task: Implement Feature - Middleware/Validation for AI routes.
 - [ ] Task: Conductor - User Manual Verification 'Phase 2: Backend API Implementation' (Protocol in workflow.md)
