@@ -33,5 +33,5 @@
 - [x] Task: Create web/src/components/ContentPreview.tsx using a Markdown renderer. (826ccaa)
 - [x] Task: Implement Feature - Real-time preview of generated content. (826ccaa)
 - [x] Task: Create persistence logic (e.g., local storage or simple backend save) for generated content. (0636c62)
-- [~] Task: Implement Feature - "Save for later" and "Export" functionality.
-- [ ] Task: Conductor - User Manual Verification 'Phase 4: Final Polish and Export' (Protocol in workflow.md)
+- [x] Task: Implement Feature - 'Save for later' and 'Export' functionality. (ea5c6b1)
+- [~] Task: Conductor - User Manual Verification 'Phase 4: Final Polish and Export' (Protocol in workflow.md)
