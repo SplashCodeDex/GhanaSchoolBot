@@ -35,4 +35,26 @@ describe('AI Generation API', () => {
         assert.ok(response.body.hasOwnProperty('paper'), "Response should have 'paper' property");
         assert.ok(response.body.hasOwnProperty('markingScheme'), "Response should have 'markingScheme' property");
     });
+
+    test('POST /api/ai/generate-lesson-note should return 400 if parameters are missing', async () => {
+        const response = await request(app)
+            .post('/api/ai/generate-lesson-note')
+            .send({
+                subject: 'Mathematics'
+                // missing grade, strand, etc.
+            });
+        
+        assert.strictEqual(response.status, 400);
+    });
+
+    test('POST /api/ai/generate-exam should return 400 if parameters are missing', async () => {
+        const response = await request(app)
+            .post('/api/ai/generate-exam')
+            .send({
+                type: 'BECE'
+                // missing subject, grade, etc.
+            });
+        
+        assert.strictEqual(response.status, 400);
+    });
 });
