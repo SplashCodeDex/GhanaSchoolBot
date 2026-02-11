@@ -20,8 +20,8 @@
 - [x] Task: Conductor - User Manual Verification 'Phase 2: Backend API Implementation' (Protocol in workflow.md)
 
 ## Phase 3: Frontend Integration (Core UI)
-- [ ] Task: Create web/src/hooks/useAIGeneration.ts for managing generation state.
-- [ ] Task: Write Tests - Verify useAIGeneration hook states (loading, success, error).
+- [x] Task: Create web/src/hooks/useAIGeneration.ts for managing generation state. (f2604f6)
+- [~] Task: Write Tests - Verify useAIGeneration hook states (loading, success, error).
 - [ ] Task: Implement Feature - useAIGeneration hook with Socket.io/Fetch integration.
 - [ ] Task: Create web/src/components/LessonNoteGenerator.tsx.
 - [ ] Task: Implement Feature - Form UI for Lesson Note generation.
