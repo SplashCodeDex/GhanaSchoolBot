@@ -23,9 +23,9 @@
 - [x] Task: Create web/src/hooks/useAIGeneration.ts for managing generation state. (f2604f6)
 - [x] Task: Write Tests - Verify useAIGeneration hook states (loading, success, error). (a9f5b83)
 - [x] Task: Implement Feature - useAIGeneration hook with Socket.io/Fetch integration. (a9f5b83)
-- [~] Task: Create web/src/components/LessonNoteGenerator.tsx.
-- [ ] Task: Implement Feature - Form UI for Lesson Note generation.
-- [ ] Task: Create web/src/components/ExamBuilder.tsx.
+- [x] Task: Create web/src/components/LessonNoteGenerator.tsx. (92aee8a)
+- [x] Task: Implement Feature - Form UI for Lesson Note generation. (92aee8a)
+- [~] Task: Create web/src/components/ExamBuilder.tsx.
 - [ ] Task: Implement Feature - Form UI for Exam building.
 - [ ] Task: Conductor - User Manual Verification 'Phase 3: Frontend Integration' (Protocol in workflow.md)
 
