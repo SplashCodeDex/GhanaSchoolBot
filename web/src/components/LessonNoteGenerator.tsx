@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { BookOpen, Sparkles, AlertCircle, Loader2, Save, FileText } from 'lucide-react';
 import { useAIGeneration } from '../hooks/useAIGeneration';
 import type { LessonNoteRequest } from '../hooks/useAIGeneration';
+import { ContentPreview } from './ContentPreview';
 
 export const LessonNoteGenerator: React.FC = () => {
     const { loading, error, generatedNote, generateLessonNote, reset } = useAIGeneration();
@@ -173,15 +174,7 @@ export const LessonNoteGenerator: React.FC = () => {
                             </button>
                         </div>
                     </div>
-                    <div style={{ 
-                        whiteSpace: 'pre-wrap', 
-                        fontFamily: 'var(--font-main)', 
-                        fontSize: '14px', 
-                        lineHeight: 1.6,
-                        color: 'var(--text-primary)'
-                    }}>
-                        {generatedNote}
-                    </div>
+                    <ContentPreview content={generatedNote} />
                 </div>
             )}
         </div>

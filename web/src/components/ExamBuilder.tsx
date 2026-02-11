@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { ClipboardCheck, Sparkles, AlertCircle, Loader2, Save, FileText, CheckCircle2 } from 'lucide-react';
 import { useAIGeneration } from '../hooks/useAIGeneration';
 import type { ExamRequest } from '../hooks/useAIGeneration';
+import { ContentPreview } from './ContentPreview';
 
 export const ExamBuilder: React.FC = () => {
     const { loading, error, generatedExam, generateExam, reset } = useAIGeneration();
@@ -190,15 +191,7 @@ export const ExamBuilder: React.FC = () => {
                                 Save Paper
                             </button>
                         </div>
-                        <div style={{ 
-                            whiteSpace: 'pre-wrap', 
-                            fontFamily: 'var(--font-main)', 
-                            fontSize: '14px', 
-                            lineHeight: 1.6,
-                            color: 'var(--text-primary)'
-                        }}>
-                            {generatedExam.paper}
-                        </div>
+                        <ContentPreview content={generatedExam.paper} />
                     </div>
 
                     <div className="card area-scroll" style={{ display: 'flex', flexDirection: 'column' }}>
@@ -212,15 +205,7 @@ export const ExamBuilder: React.FC = () => {
                                 Save Scheme
                             </button>
                         </div>
-                        <div style={{ 
-                            whiteSpace: 'pre-wrap', 
-                            fontFamily: 'var(--font-main)', 
-                            fontSize: '14px', 
-                            lineHeight: 1.6,
-                            color: 'var(--text-primary)'
-                        }}>
-                            {generatedExam.markingScheme}
-                        </div>
+                        <ContentPreview content={generatedExam.markingScheme} />
                     </div>
                 </div>
             )}
