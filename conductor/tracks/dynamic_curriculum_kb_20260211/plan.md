@@ -22,8 +22,8 @@
 - [x] Task: Conductor - User Manual Verification 'Phase 3: Dynamic Frontend' (Protocol in workflow.md) (673562b)
 
 ## Phase 4: Curriculum Explorer & Search UI
-- [ ] Task: Create web/src/components/CurriculumExplorer.tsx with tree browser and search bar.
+- [~] Task: Create web/src/components/CurriculumExplorer.tsx with tree browser and search bar.
 - [ ] Task: Implement 'Semantic Search' display in the Explorer.
 - [ ] Task: Integrate 'Curriculum Explorer' into the main Dashboard (App.tsx and Sidebar.tsx).
 - [ ] Task: Final Polish - Ensure breadcrumbs or 'Selected Context' is clear in the UI.
-- [ ] Task: Conductor - User Manual Verification 'Phase 4: Curriculum Explorer' (Protocol in workflow.md)
+- [~] Task: Conductor - User Manual Verification 'Phase 4: Curriculum Explorer' (Protocol in workflow.md)
