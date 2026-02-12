@@ -1,11 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BookOpen, Sparkles, AlertCircle, Loader2, Save, FileText, Download as DownloadIcon, CheckCircle2 } from 'lucide-react';
 import { useAIGeneration } from '../hooks/useAIGeneration';
+import { useCurriculum, Level, Strand, SubStrand } from '../hooks/useCurriculum';
 import { ContentPreview } from './ContentPreview';
 
 export const LessonNoteGenerator: React.FC = () => {
-    const { loading, error, generatedNote, generateLessonNote, saveContent, reset } = useAIGeneration();
+    const { loading: aiLoading, error: aiError, generatedNote, generateLessonNote, saveContent, reset } = useAIGeneration();
+    const { loading: curriculumLoading, getLevels, getSubjectsByGrade, getStructure } = useCurriculum();
+    
     const [savedStatus, setSavedStatus] = useState<string | null>(null);
+    const [levels, setLevels] = useState<Level[]>([]);
+    const [subjects, setSubjects] = useState<string[]>([]);
+    const [strands, setStrands] = useState<Strand[]>([]);
+    const [availableSubStrands, setAvailableSubStrands] = useState<SubStrand[]>([]);
     
     const [formData, setFormData] = useState({
         subject: '',
@@ -15,13 +22,53 @@ export const LessonNoteGenerator: React.FC = () => {
         additionalInstructions: ''
     });
 
-    const subjects = [
-        "Mathematics", "English Language", "Science", "Social Studies", 
-        "Computing", "ICT", "Career Technology", "Creative Arts", 
-        "French", "Ghanaian Language", "Physics", "Chemistry", "Biology"
-    ];
+    // Initial load: Fetch levels
+    useEffect(() => {
+        const loadLevels = async () => {
+            const data = await getLevels();
+            setLevels(data);
+        };
+        loadLevels();
+    }, [getLevels]);
 
-    const grades = ["JHS1", "JHS2", "JHS3", "SHS1", "SHS2", "SHS3"];
+    // When grade changes: Fetch subjects
+    useEffect(() => {
+        if (formData.grade) {
+            const loadSubjects = async () => {
+                const data = await getSubjectsByGrade(formData.grade.toLowerCase());
+                setSubjects(data);
+                setFormData(prev => ({ ...prev, subject: '', strand: '', subStrand: '' }));
+            };
+            loadSubjects();
+        } else {
+            setSubjects([]);
+        }
+    }, [formData.grade, getSubjectsByGrade]);
+
+    // When subject changes: Fetch structure
+    useEffect(() => {
+        if (formData.grade && formData.subject) {
+            const loadStructure = async () => {
+                const data = await getStructure(formData.grade.toLowerCase(), formData.subject);
+                setStrands(data);
+                setFormData(prev => ({ ...prev, strand: '', subStrand: '' }));
+            };
+            loadStructure();
+        } else {
+            setStrands([]);
+        }
+    }, [formData.grade, formData.subject, getStructure]);
+
+    // When strand changes: Update sub-strands
+    useEffect(() => {
+        if (formData.strand) {
+            const selectedStrand = strands.find(s => s.name === formData.strand);
+            setAvailableSubStrands(selectedStrand?.subStrands || []);
+            setFormData(prev => ({ ...prev, subStrand: '' }));
+        } else {
+            setAvailableSubStrands([]);
+        }
+    }, [formData.strand, strands]);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
@@ -63,6 +110,8 @@ export const LessonNoteGenerator: React.FC = () => {
         URL.revokeObjectURL(url);
     };
 
+    const loading = aiLoading || curriculumLoading;
+
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-lg)', height: '100%' }}>
             <div className="card">
@@ -72,26 +121,6 @@ export const LessonNoteGenerator: React.FC = () => {
                 </div>
 
                 <form onSubmit={handleSubmit} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-md)' }}>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-xs)' }}>
-                        <label style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>Subject</label>
-                        <select 
-                            name="subject" 
-                            value={formData.subject} 
-                            onChange={handleInputChange}
-                            required
-                            style={{ 
-                                padding: '8px', 
-                                background: 'var(--bg-surface-elevated)', 
-                                border: '1px solid var(--border-subtle)',
-                                color: 'var(--text-primary)',
-                                borderRadius: 'var(--radius-sm)'
-                            }}
-                        >
-                            <option value="">Select Subject</option>
-                            {subjects.map(s => <option key={s} value={s}>{s}</option>)}
-                        </select>
-                    </div>
-
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-xs)' }}>
                         <label style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>Grade Level</label>
                         <select 
@@ -108,44 +137,80 @@ export const LessonNoteGenerator: React.FC = () => {
                             }}
                         >
                             <option value="">Select Grade</option>
-                            {grades.map(g => <option key={g} value={g}>{g}</option>)}
+                            {levels.map(level => (
+                                <optgroup key={level.id} label={level.name}>
+                                    {level.grades.map(g => (
+                                        <option key={g.id} value={g.id.toUpperCase()}>{g.name}</option>
+                                    ))}
+                                </optgroup>
+                            ))}
+                        </select>
+                    </div>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-xs)' }}>
+                        <label style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>Subject</label>
+                        <select 
+                            name="subject" 
+                            value={formData.subject} 
+                            onChange={handleInputChange}
+                            required
+                            disabled={!formData.grade}
+                            style={{ 
+                                padding: '8px', 
+                                background: 'var(--bg-surface-elevated)', 
+                                border: '1px solid var(--border-subtle)',
+                                color: 'var(--text-primary)',
+                                borderRadius: 'var(--radius-sm)',
+                                opacity: formData.grade ? 1 : 0.5
+                            }}
+                        >
+                            <option value="">Select Subject</option>
+                            {subjects.map(s => <option key={s} value={s}>{s}</option>)}
                         </select>
                     </div>
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-xs)' }}>
                         <label style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>Strand</label>
-                        <input 
+                        <select 
                             name="strand" 
                             value={formData.strand} 
                             onChange={handleInputChange}
-                            placeholder="e.g. Number"
                             required
+                            disabled={!formData.subject}
                             style={{ 
                                 padding: '8px', 
                                 background: 'var(--bg-surface-elevated)', 
                                 border: '1px solid var(--border-subtle)',
                                 color: 'var(--text-primary)',
-                                borderRadius: 'var(--radius-sm)'
+                                borderRadius: 'var(--radius-sm)',
+                                opacity: formData.subject ? 1 : 0.5
                             }}
-                        />
+                        >
+                            <option value="">Select Strand</option>
+                            {strands.map(s => <option key={s.id} value={s.name}>{s.name}</option>)}
+                        </select>
                     </div>
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-xs)' }}>
                         <label style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>Sub-strand</label>
-                        <input 
+                        <select 
                             name="subStrand" 
                             value={formData.subStrand} 
                             onChange={handleInputChange}
-                            placeholder="e.g. Integers"
                             required
+                            disabled={!formData.strand}
                             style={{ 
                                 padding: '8px', 
                                 background: 'var(--bg-surface-elevated)', 
                                 border: '1px solid var(--border-subtle)',
                                 color: 'var(--text-primary)',
-                                borderRadius: 'var(--radius-sm)'
+                                borderRadius: 'var(--radius-sm)',
+                                opacity: formData.strand ? 1 : 0.5
                             }}
-                        />
+                        >
+                            <option value="">Select Sub-strand</option>
+                            {availableSubStrands.map(ss => <option key={ss.id} value={ss.name}>{ss.name}</option>)}
+                        </select>
                     </div>
 
                     <div style={{ gridColumn: 'span 2', display: 'flex', flexDirection: 'column', gap: 'var(--space-xs)' }}>
@@ -171,17 +236,17 @@ export const LessonNoteGenerator: React.FC = () => {
                         <button type="button" onClick={() => { reset(); setSavedStatus(null); }} className="btn" disabled={loading}>Reset</button>
                         <button type="submit" className="btn btn-primary" disabled={loading}>
                             {loading ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
-                            {loading ? 'Generating...' : 'Generate Lesson Note'}
+                            {loading ? 'Processing...' : 'Generate Lesson Note'}
                         </button>
                     </div>
                 </form>
             </div>
 
-            {error && (
+            {aiError && (
                 <div className="card" style={{ borderColor: 'var(--danger)', background: 'rgba(239, 68, 68, 0.05)' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--danger)' }}>
                         <AlertCircle size={18} />
-                        <span style={{ fontSize: '14px', fontWeight: 500 }}>{error}</span>
+                        <span style={{ fontSize: '14px', fontWeight: 500 }}>{aiError}</span>
                     </div>
                 </div>
             )}

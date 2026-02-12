@@ -1,12 +1,19 @@
+import React, { useState, useEffect } from 'react';
 import { ClipboardCheck, Sparkles, AlertCircle, Loader2, Save, FileText, CheckCircle2, Download as DownloadIcon, Info } from 'lucide-react';
 import { useAIGeneration } from '../hooks/useAIGeneration';
 import type { ExamRequest } from '../hooks/useAIGeneration';
+import { useCurriculum, Level, Strand, SubStrand } from '../hooks/useCurriculum';
 import { ContentPreview } from './ContentPreview';
-import { getStrands, getSubStrands, getTopics } from '../utils/curriculumData';
 
 export const ExamBuilder: React.FC = () => {
-    const { loading, error, generatedExam, generateExam, saveContent, reset } = useAIGeneration();
+    const { loading: aiLoading, error: aiError, generatedExam, generateExam, saveContent, reset } = useAIGeneration();
+    const { loading: curriculumLoading, getLevels, getSubjectsByGrade, getStructure } = useCurriculum();
+    
     const [savedStatus, setSavedStatus] = useState<string | null>(null);
+    const [levels, setLevels] = useState<Level[]>([]);
+    const [subjects, setSubjects] = useState<string[]>([]);
+    const [strands, setStrands] = useState<Strand[]>([]);
+    const [availableSubStrands, setAvailableSubStrands] = useState<SubStrand[]>([]);
 
     const [formData, setFormData] = useState<ExamRequest>({
         type: 'MOCK',
@@ -21,18 +28,72 @@ export const ExamBuilder: React.FC = () => {
     });
 
     const [customInstructions, setCustomInstructions] = useState('');
-
     const [topicsInput, setTopicsInput] = useState('');
 
     const examTypes = ['MOCK', 'BECE', 'WASSCE', 'TERM', 'CLASS_TEST', 'HOMEWORK'];
 
-    const subjects = [
-        "Mathematics", "English Language", "Science", "Social Studies",
-        "Computing", "ICT", "Career Technology", "Creative Arts",
-        "French", "Ghanaian Language", "Physics", "Chemistry", "Biology"
-    ];
+    // Initial load: Fetch levels
+    useEffect(() => {
+        const loadLevels = async () => {
+            const data = await getLevels();
+            setLevels(data);
+        };
+        loadLevels();
+    }, [getLevels]);
 
-    const grades = ["JHS1", "JHS2", "JHS3", "SHS1", "SHS2", "SHS3"];
+    // When grade changes: Fetch subjects
+    useEffect(() => {
+        if (formData.grade) {
+            const loadSubjects = async () => {
+                const data = await getSubjectsByGrade(formData.grade.toLowerCase());
+                setSubjects(data);
+                setFormData(prev => ({ ...prev, subject: '', strand: '', subStrand: '', topics: [] }));
+                setTopicsInput('');
+            };
+            loadSubjects();
+        } else {
+            setSubjects([]);
+        }
+    }, [formData.grade, getSubjectsByGrade]);
+
+    // When subject changes: Fetch structure
+    useEffect(() => {
+        if (formData.grade && formData.subject) {
+            const loadStructure = async () => {
+                const data = await getStructure(formData.grade.toLowerCase(), formData.subject);
+                setStrands(data);
+                setFormData(prev => ({ ...prev, strand: '', subStrand: '', topics: [] }));
+                setTopicsInput('');
+            };
+            loadStructure();
+        } else {
+            setStrands([]);
+        }
+    }, [formData.grade, formData.subject, getStructure]);
+
+    // When strand changes: Update sub-strands
+    useEffect(() => {
+        if (formData.strand) {
+            const selectedStrand = strands.find(s => s.name === formData.strand);
+            setAvailableSubStrands(selectedStrand?.subStrands || []);
+            setFormData(prev => ({ ...prev, subStrand: '', topics: [] }));
+            setTopicsInput('');
+        } else {
+            setAvailableSubStrands([]);
+        }
+    }, [formData.strand, strands]);
+
+    // When sub-strand changes: Update topics/indicators
+    useEffect(() => {
+        if (formData.subStrand) {
+            const selectedSubStrand = availableSubStrands.find(ss => ss.name === formData.subStrand);
+            if (selectedSubStrand) {
+                const indicators = selectedSubStrand.indicators || [];
+                setFormData(prev => ({ ...prev, topics: indicators }));
+                setTopicsInput(indicators.join(', '));
+            }
+        }
+    }, [formData.subStrand, availableSubStrands]);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const { name, value, type } = e.target as HTMLInputElement;
@@ -43,31 +104,6 @@ export const ExamBuilder: React.FC = () => {
                 [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked :
                     name === 'numQuestions' ? parseInt(value) || 0 : value
             };
-
-            // Reset dependent fields if parent changes
-            if (name === 'subject') {
-                newState.strand = '';
-                newState.subStrand = '';
-                newState.topics = [];
-                setTopicsInput('');
-            } else if (name === 'strand') {
-                newState.subStrand = '';
-                newState.topics = [];
-                setTopicsInput('');
-            } else if (name === 'subStrand') {
-                const autoTopics = getTopics(prev.subject, prev.strand || '', value);
-                newState.topics = autoTopics;
-                setTopicsInput(autoTopics.join(', '));
-
-                // Set default instructions based on type
-                if (!customInstructions) {
-                    const rubric = newState.type === 'BECE' || newState.type === 'WASSCE'
-                        ? `Section A contains ${newState.includeObjectives ? 'Objective' : ''} questions. Section B contains ${newState.includeTheory ? 'Theory' : ''} questions. Answer all questions.`
-                        : `Please answer all questions carefully based on the topics discussed in ${value}.`;
-                    setCustomInstructions(rubric);
-                }
-            }
-
             return newState;
         });
     };
@@ -115,6 +151,8 @@ export const ExamBuilder: React.FC = () => {
         URL.revokeObjectURL(url);
     };
 
+    const loading = aiLoading || curriculumLoading;
+
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-lg)', height: '100%' }}>
             <div className="card">
@@ -144,26 +182,6 @@ export const ExamBuilder: React.FC = () => {
                     </div>
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-xs)' }}>
-                        <label style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>Subject</label>
-                        <select
-                            name="subject"
-                            value={formData.subject}
-                            onChange={handleInputChange}
-                            required
-                            style={{
-                                padding: '8px',
-                                background: 'var(--bg-surface-elevated)',
-                                border: '1px solid var(--border-subtle)',
-                                color: 'var(--text-primary)',
-                                borderRadius: 'var(--radius-sm)'
-                            }}
-                        >
-                            <option value="">Select Subject</option>
-                            {subjects.map(s => <option key={s} value={s}>{s}</option>)}
-                        </select>
-                    </div>
-
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-xs)' }}>
                         <label style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>Grade Level</label>
                         <select
                             name="grade"
@@ -179,7 +197,35 @@ export const ExamBuilder: React.FC = () => {
                             }}
                         >
                             <option value="">Select Grade</option>
-                            {grades.map(g => <option key={g} value={g}>{g}</option>)}
+                            {levels.map(level => (
+                                <optgroup key={level.id} label={level.name}>
+                                    {level.grades.map(g => (
+                                        <option key={g.id} value={g.id.toUpperCase()}>{g.name}</option>
+                                    ))}
+                                </optgroup>
+                            ))}
+                        </select>
+                    </div>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-xs)' }}>
+                        <label style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>Subject</label>
+                        <select
+                            name="subject"
+                            value={formData.subject}
+                            onChange={handleInputChange}
+                            required
+                            disabled={!formData.grade}
+                            style={{
+                                padding: '8px',
+                                background: 'var(--bg-surface-elevated)',
+                                border: '1px solid var(--border-subtle)',
+                                color: 'var(--text-primary)',
+                                borderRadius: 'var(--radius-sm)',
+                                opacity: formData.grade ? 1 : 0.5
+                            }}
+                        >
+                            <option value="">Select Subject</option>
+                            {subjects.map(s => <option key={s} value={s}>{s}</option>)}
                         </select>
                     </div>
 
@@ -201,7 +247,7 @@ export const ExamBuilder: React.FC = () => {
                             }}
                         >
                             <option value="">Select Strand</option>
-                            {formData.subject && getStrands(formData.subject).map(s => <option key={s} value={s}>{s}</option>)}
+                            {strands.map(s => <option key={s.id} value={s.name}>{s.name}</option>)}
                         </select>
                     </div>
 
@@ -223,7 +269,7 @@ export const ExamBuilder: React.FC = () => {
                             }}
                         >
                             <option value="">Select Sub-Strand</option>
-                            {formData.strand && getSubStrands(formData.subject, formData.strand).map(ss => <option key={ss} value={ss}>{ss}</option>)}
+                            {availableSubStrands.map(ss => <option key={ss.id} value={ss.name}>{ss.name}</option>)}
                         </select>
                     </div>
 
@@ -324,17 +370,17 @@ export const ExamBuilder: React.FC = () => {
                             disabled={loading || (!formData.includeTheory && !formData.includeObjectives)}
                         >
                             {loading ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
-                            {loading ? 'Generating Exam...' : 'Build Examination'}
+                            {loading ? 'Processing...' : 'Build Examination'}
                         </button>
                     </div>
                 </form>
             </div>
 
-            {error && (
+            {aiError && (
                 <div className="card" style={{ borderColor: 'var(--danger)', background: 'rgba(239, 68, 68, 0.05)' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--danger)' }}>
                         <AlertCircle size={18} />
-                        <span style={{ fontSize: '14px', fontWeight: 500 }}>{error}</span>
+                        <span style={{ fontSize: '14px', fontWeight: 500 }}>{aiError}</span>
                     </div>
                 </div>
             )}
