@@ -7,12 +7,12 @@
 - [x] Task: Implement Feature - CurriculumService core logic. (f545c83)
 - [x] Task: Conductor - User Manual Verification 'Phase 1: Data Architecture' (Protocol in workflow.md) (8a3d0da)
 
-## Phase 2: Curriculum API & Semantic Search
+## Phase 2: Curriculum API & Semantic Search [checkpoint: ca144c7]
 - [x] Task: Implement /api/curriculum/structure and /api/curriculum/subjects endpoints in server.ts. (1cf5bc3)
 - [x] Task: Write Tests - Verify API responses for dynamic curriculum data. (1cf5bc3)
 - [x] Task: Implement /api/curriculum/search (Gemini Semantic Search). (90f9a8d)
 - [x] Task: Write Tests - Verify semantic search returns relevant KB nodes. (90f9a8d)
-- [~] Task: Conductor - User Manual Verification 'Phase 2: Curriculum API' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 2: Curriculum API' (Protocol in workflow.md) (ca144c7)
 
 ## Phase 3: Dynamic Frontend Integration
 - [ ] Task: Create web/src/hooks/useCurriculum.ts for fetching KB data.
