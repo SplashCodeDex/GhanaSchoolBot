@@ -8,8 +8,8 @@
 - [x] Task: Conductor - User Manual Verification 'Phase 1: Data Architecture' (Protocol in workflow.md) (8a3d0da)
 
 ## Phase 2: Curriculum API & Semantic Search
-- [ ] Task: Implement /api/curriculum/structure and /api/curriculum/subjects endpoints in server.ts.
-- [ ] Task: Write Tests - Verify API responses for dynamic curriculum data.
+- [x] Task: Implement /api/curriculum/structure and /api/curriculum/subjects endpoints in server.ts. (1cf5bc3)
+- [x] Task: Write Tests - Verify API responses for dynamic curriculum data. (1cf5bc3)
 - [ ] Task: Implement /api/curriculum/search (Gemini Semantic Search).
 - [ ] Task: Write Tests - Verify semantic search returns relevant KB nodes.
 - [ ] Task: Conductor - User Manual Verification 'Phase 2: Curriculum API' (Protocol in workflow.md)
