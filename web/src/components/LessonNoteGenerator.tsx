@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { BookOpen, Sparkles, AlertCircle, Loader2, Save, FileText, Download as DownloadIcon, CheckCircle2 } from 'lucide-react';
 import { useAIGeneration } from '../hooks/useAIGeneration';
-import { useCurriculum, Level, Strand, SubStrand } from '../hooks/useCurriculum';
+import { useCurriculum } from '../hooks/useCurriculum';
+import type { Level, Strand, SubStrand } from '../hooks/useCurriculum';
 import { ContentPreview } from './ContentPreview';
 
 export const LessonNoteGenerator: React.FC = () => {

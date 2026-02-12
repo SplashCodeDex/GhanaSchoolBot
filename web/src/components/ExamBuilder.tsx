@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { ClipboardCheck, Sparkles, AlertCircle, Loader2, Save, FileText, CheckCircle2, Download as DownloadIcon, Info } from 'lucide-react';
 import { useAIGeneration } from '../hooks/useAIGeneration';
 import type { ExamRequest } from '../hooks/useAIGeneration';
-import { useCurriculum, Level, Strand, SubStrand } from '../hooks/useCurriculum';
+import { useCurriculum } from '../hooks/useCurriculum';
+import type { Level, Strand, SubStrand } from '../hooks/useCurriculum';
 import { ContentPreview } from './ContentPreview';
 
 export const ExamBuilder: React.FC = () => {
