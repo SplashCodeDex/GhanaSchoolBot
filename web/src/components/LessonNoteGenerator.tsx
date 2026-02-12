@@ -116,9 +116,15 @@ export const LessonNoteGenerator: React.FC = () => {
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-lg)', height: '100%' }}>
             <div className="card">
-                <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)', marginBottom: 'var(--space-md)' }}>
-                    <BookOpen size={20} style={{ color: 'var(--accent-primary)' }} />
-                    <h2 style={{ fontSize: '18px', fontWeight: 600, margin: 0 }}>AI Lesson Note Generator</h2>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--space-md)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)' }}>
+                        <BookOpen size={20} style={{ color: 'var(--accent-primary)' }} />
+                        <h2 style={{ fontSize: '18px', fontWeight: 600, margin: 0 }}>AI Lesson Note Generator</h2>
+                    </div>
+                    <div style={{ fontSize: '12px', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <Info size={14} />
+                        Use <strong>Curriculum Explorer</strong> to find topics.
+                    </div>
                 </div>
 
                 <form onSubmit={handleSubmit} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-md)' }}>
