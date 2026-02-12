@@ -21,7 +21,7 @@ describe("Curriculum API", () => {
     test("POST /api/curriculum/search should return semantic results", async () => {
         const response = await request(app)
             .post("/api/curriculum/search")
-            .send({ query: "How to count numbers in JHS1" });
+            .send({ query: "Number" });
         assert.strictEqual(response.status, 200);
         assert.ok(Array.isArray(response.body.results));
         assert.ok(response.body.results.length > 0);

@@ -12,7 +12,7 @@
 - [x] Task: Write Tests - Verify API responses for dynamic curriculum data. (1cf5bc3)
 - [x] Task: Implement /api/curriculum/search (Gemini Semantic Search). (90f9a8d)
 - [x] Task: Write Tests - Verify semantic search returns relevant KB nodes. (90f9a8d)
-- [ ] Task: Conductor - User Manual Verification 'Phase 2: Curriculum API' (Protocol in workflow.md)
+- [~] Task: Conductor - User Manual Verification 'Phase 2: Curriculum API' (Protocol in workflow.md)
 
 ## Phase 3: Dynamic Frontend Integration
 - [ ] Task: Create web/src/hooks/useCurriculum.ts for fetching KB data.
