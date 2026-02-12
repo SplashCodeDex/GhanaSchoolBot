@@ -15,11 +15,11 @@
 - [x] Task: Conductor - User Manual Verification 'Phase 2: Curriculum API' (Protocol in workflow.md) (ca144c7)
 
 ## Phase 3: Dynamic Frontend Integration
-- [ ] Task: Create web/src/hooks/useCurriculum.ts for fetching KB data.
+- [~] Task: Create web/src/hooks/useCurriculum.ts for fetching KB data.
 - [ ] Task: Refactor web/src/components/LessonNoteGenerator.tsx to use dynamic subjects and strands.
 - [ ] Task: Refactor web/src/components/ExamBuilder.tsx to use dynamic subjects and topics.
 - [ ] Task: Write Tests - Verify UI updates correctly when subject selection changes.
-- [ ] Task: Conductor - User Manual Verification 'Phase 3: Dynamic Frontend' (Protocol in workflow.md)
+- [~] Task: Conductor - User Manual Verification 'Phase 3: Dynamic Frontend' (Protocol in workflow.md)
 
 ## Phase 4: Curriculum Explorer & Search UI
 - [ ] Task: Create web/src/components/CurriculumExplorer.tsx with tree browser and search bar.
