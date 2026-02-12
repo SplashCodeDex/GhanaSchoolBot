@@ -1,11 +1,11 @@
 ﻿# Implementation Plan: Dynamic Curriculum Knowledge Base
 
-## Phase 1: Data Architecture & Storage
+## Phase 1: Data Architecture & Storage [checkpoint: 8a3d0da]
 - [x] Task: Create educational-scraper/data/curriculum_kb.json with initial schema and seed data (Sample subjects for Primary, JHS, SHS). (740d8d8)
 - [x] Task: Create educational-scraper/src/utils/curriculum-service.ts to handle KB parsing and queries. (5d5523f)
 - [x] Task: Write Tests - Verify CurriculumService correctly retrieves subjects and filters hierarchy. (f545c83)
 - [x] Task: Implement Feature - CurriculumService core logic. (f545c83)
-- [~] Task: Conductor - User Manual Verification 'Phase 1: Data Architecture' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 1: Data Architecture' (Protocol in workflow.md) (8a3d0da)
 
 ## Phase 2: Curriculum API & Semantic Search
 - [ ] Task: Implement /api/curriculum/structure and /api/curriculum/subjects endpoints in server.ts.
