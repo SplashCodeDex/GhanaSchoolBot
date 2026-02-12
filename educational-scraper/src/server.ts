@@ -10,6 +10,7 @@ import { StatsManager } from './utils/stats-manager';
 import { scanDirectory } from './utils/file-scanner';
 import { AIPdfAnalyzer } from './utils/ai-pdf-analyzer';
 import { AIGeneratorService } from './utils/ai-generator-service';
+import { CurriculumService } from './utils/curriculum-service';
 
 const app = express();
 const PORT = 3001;
@@ -145,6 +146,32 @@ const pdfAnalyzer = new AIPdfAnalyzer(config.geminiApiKey, downloadsPath);
 
 // Initialize AI Generator Service
 const aiGenerator = new AIGeneratorService(config.geminiApiKey);
+
+// Initialize Curriculum Service
+const curriculumService = new CurriculumService();
+
+// --- Curriculum Endpoints ---
+
+app.get('/api/curriculum/levels', (req, res) => {
+    res.json(curriculumService.getLevels());
+});
+
+app.get('/api/curriculum/subjects', (req, res) => {
+    const { gradeId } = req.query;
+    if (!gradeId) {
+        return res.status(400).json({ error: 'gradeId is required' });
+    }
+    res.json(curriculumService.getSubjectsByGrade(gradeId as string));
+});
+
+app.get('/api/curriculum/structure', (req, res) => {
+    const { gradeId, subject } = req.query;
+    if (!gradeId || !subject) {
+        return res.status(400).json({ error: 'gradeId and subject are required' });
+    }
+    const strands = curriculumService.getStrands(gradeId as string, subject as string);
+    res.json({ strands });
+});
 
 app.post('/api/ai/generate-lesson-note', async (req, res) => {
     try {
