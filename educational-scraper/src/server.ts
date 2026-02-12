@@ -165,13 +165,21 @@ app.post('/api/ai/generate-lesson-note', async (req, res) => {
 
 app.post('/api/ai/generate-exam', async (req, res) => {
     try {
-        const { type, subject, grade, topics, numQuestions } = req.body;
+        const { type, subject, grade, topics, numQuestions, includeTheory, includeObjectives, strand, subStrand } = req.body;
         if (!type || !subject || !grade || !topics || !numQuestions) {
             return res.status(400).json({ error: 'Missing required examination parameters' });
         }
 
+        if (includeTheory === undefined && includeObjectives === undefined) {
+            return res.status(400).json({ error: 'At least one question type (Theory or Objectives) must be specified' });
+        }
+
         const result = await aiGenerator.generateExamination({
-            type, subject, grade, topics, numQuestions
+            type, subject, grade, topics, numQuestions,
+            includeTheory: !!includeTheory,
+            includeObjectives: !!includeObjectives,
+            strand,
+            subStrand
         });
         res.json(result);
     } catch (error: any) {
@@ -188,17 +196,17 @@ app.post('/api/ai/chat', async (req, res) => {
         }
 
         // We'll use a direct call to the model for now, could be moved to AIGeneratorService
-        const prompt = `You are an expert AI educational assistant for the Ghana School Bot platform. 
+        const prompt = `You are an expert AI educational assistant for the Ghana School Bot platform.
         Your goal is to help teachers and students with curriculum questions, lesson planning, and understanding educational concepts.
-        
+
         User Question: ${message}
-        
+
         Provide a helpful, accurate, and concise response.`;
 
         const result = await aiGenerator['model'].generateContent(prompt);
         const response = await result.response;
         const text = response.text() || "I couldn't generate a response.";
-        
+
         res.json({ response: text });
     } catch (error: any) {
         console.error('[API] Chat error:', error.message);

@@ -1,39 +1,75 @@
-import React, { useState } from 'react';
-import { ClipboardCheck, Sparkles, AlertCircle, Loader2, Save, FileText, CheckCircle2, Download as DownloadIcon } from 'lucide-react';
+import { ClipboardCheck, Sparkles, AlertCircle, Loader2, Save, FileText, CheckCircle2, Download as DownloadIcon, Info } from 'lucide-react';
 import { useAIGeneration } from '../hooks/useAIGeneration';
 import type { ExamRequest } from '../hooks/useAIGeneration';
 import { ContentPreview } from './ContentPreview';
+import { getStrands, getSubStrands, getTopics } from '../utils/curriculumData';
 
 export const ExamBuilder: React.FC = () => {
     const { loading, error, generatedExam, generateExam, saveContent, reset } = useAIGeneration();
     const [savedStatus, setSavedStatus] = useState<string | null>(null);
-    
+
     const [formData, setFormData] = useState<ExamRequest>({
         type: 'MOCK',
         subject: '',
         grade: '',
+        strand: '',
+        subStrand: '',
         topics: [],
-        numQuestions: 10
+        numQuestions: 10,
+        includeTheory: true,
+        includeObjectives: true
     });
+
+    const [customInstructions, setCustomInstructions] = useState('');
 
     const [topicsInput, setTopicsInput] = useState('');
 
     const examTypes = ['MOCK', 'BECE', 'WASSCE', 'TERM', 'CLASS_TEST', 'HOMEWORK'];
-    
+
     const subjects = [
-        "Mathematics", "English Language", "Science", "Social Studies", 
-        "Computing", "ICT", "Career Technology", "Creative Arts", 
+        "Mathematics", "English Language", "Science", "Social Studies",
+        "Computing", "ICT", "Career Technology", "Creative Arts",
         "French", "Ghanaian Language", "Physics", "Chemistry", "Biology"
     ];
 
     const grades = ["JHS1", "JHS2", "JHS3", "SHS1", "SHS2", "SHS3"];
 
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-        const { name, value } = e.target;
-        setFormData(prev => ({ 
-            ...prev, 
-            [name]: name === 'numQuestions' ? parseInt(value) || 0 : value 
-        }));
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+        const { name, value, type } = e.target as HTMLInputElement;
+
+        setFormData(prev => {
+            const newState = {
+                ...prev,
+                [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked :
+                    name === 'numQuestions' ? parseInt(value) || 0 : value
+            };
+
+            // Reset dependent fields if parent changes
+            if (name === 'subject') {
+                newState.strand = '';
+                newState.subStrand = '';
+                newState.topics = [];
+                setTopicsInput('');
+            } else if (name === 'strand') {
+                newState.subStrand = '';
+                newState.topics = [];
+                setTopicsInput('');
+            } else if (name === 'subStrand') {
+                const autoTopics = getTopics(prev.subject, prev.strand || '', value);
+                newState.topics = autoTopics;
+                setTopicsInput(autoTopics.join(', '));
+
+                // Set default instructions based on type
+                if (!customInstructions) {
+                    const rubric = newState.type === 'BECE' || newState.type === 'WASSCE'
+                        ? `Section A contains ${newState.includeObjectives ? 'Objective' : ''} questions. Section B contains ${newState.includeTheory ? 'Theory' : ''} questions. Answer all questions.`
+                        : `Please answer all questions carefully based on the topics discussed in ${value}.`;
+                    setCustomInstructions(rubric);
+                }
+            }
+
+            return newState;
+        });
     };
 
     const handleTopicsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -90,14 +126,14 @@ export const ExamBuilder: React.FC = () => {
                 <form onSubmit={handleSubmit} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 'var(--space-md)' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-xs)' }}>
                         <label style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>Exam Type</label>
-                        <select 
-                            name="type" 
-                            value={formData.type} 
+                        <select
+                            name="type"
+                            value={formData.type}
                             onChange={handleInputChange}
                             required
-                            style={{ 
-                                padding: '8px', 
-                                background: 'var(--bg-surface-elevated)', 
+                            style={{
+                                padding: '8px',
+                                background: 'var(--bg-surface-elevated)',
                                 border: '1px solid var(--border-subtle)',
                                 color: 'var(--text-primary)',
                                 borderRadius: 'var(--radius-sm)'
@@ -109,14 +145,14 @@ export const ExamBuilder: React.FC = () => {
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-xs)' }}>
                         <label style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>Subject</label>
-                        <select 
-                            name="subject" 
-                            value={formData.subject} 
+                        <select
+                            name="subject"
+                            value={formData.subject}
                             onChange={handleInputChange}
                             required
-                            style={{ 
-                                padding: '8px', 
-                                background: 'var(--bg-surface-elevated)', 
+                            style={{
+                                padding: '8px',
+                                background: 'var(--bg-surface-elevated)',
                                 border: '1px solid var(--border-subtle)',
                                 color: 'var(--text-primary)',
                                 borderRadius: 'var(--radius-sm)'
@@ -129,14 +165,14 @@ export const ExamBuilder: React.FC = () => {
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-xs)' }}>
                         <label style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>Grade Level</label>
-                        <select 
-                            name="grade" 
-                            value={formData.grade} 
+                        <select
+                            name="grade"
+                            value={formData.grade}
                             onChange={handleInputChange}
                             required
-                            style={{ 
-                                padding: '8px', 
-                                background: 'var(--bg-surface-elevated)', 
+                            style={{
+                                padding: '8px',
+                                background: 'var(--bg-surface-elevated)',
                                 border: '1px solid var(--border-subtle)',
                                 color: 'var(--text-primary)',
                                 borderRadius: 'var(--radius-sm)'
@@ -147,37 +183,63 @@ export const ExamBuilder: React.FC = () => {
                         </select>
                     </div>
 
-                    <div style={{ gridColumn: 'span 2', display: 'flex', flexDirection: 'column', gap: 'var(--space-xs)' }}>
-                        <label style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>Topics (comma separated)</label>
-                        <input 
-                            name="topics" 
-                            value={topicsInput} 
-                            onChange={handleTopicsChange}
-                            placeholder="e.g. Matter, Energy, Ecosystems"
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-xs)' }}>
+                        <label style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>Strand (Curriculum)</label>
+                        <select
+                            name="strand"
+                            value={formData.strand}
+                            onChange={handleInputChange}
+                            disabled={!formData.subject}
                             required
-                            style={{ 
-                                padding: '8px', 
-                                background: 'var(--bg-surface-elevated)', 
+                            style={{
+                                padding: '8px',
+                                background: 'var(--bg-surface-elevated)',
                                 border: '1px solid var(--border-subtle)',
                                 color: 'var(--text-primary)',
-                                borderRadius: 'var(--radius-sm)'
+                                borderRadius: 'var(--radius-sm)',
+                                opacity: formData.subject ? 1 : 0.5
                             }}
-                        />
+                        >
+                            <option value="">Select Strand</option>
+                            {formData.subject && getStrands(formData.subject).map(s => <option key={s} value={s}>{s}</option>)}
+                        </select>
+                    </div>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-xs)' }}>
+                        <label style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>Sub-Strand</label>
+                        <select
+                            name="subStrand"
+                            value={formData.subStrand}
+                            onChange={handleInputChange}
+                            disabled={!formData.strand}
+                            required
+                            style={{
+                                padding: '8px',
+                                background: 'var(--bg-surface-elevated)',
+                                border: '1px solid var(--border-subtle)',
+                                color: 'var(--text-primary)',
+                                borderRadius: 'var(--radius-sm)',
+                                opacity: formData.strand ? 1 : 0.5
+                            }}
+                        >
+                            <option value="">Select Sub-Strand</option>
+                            {formData.strand && getSubStrands(formData.subject, formData.strand).map(ss => <option key={ss} value={ss}>{ss}</option>)}
+                        </select>
                     </div>
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-xs)' }}>
                         <label style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>Number of Questions</label>
-                        <input 
+                        <input
                             type="number"
-                            name="numQuestions" 
-                            value={formData.numQuestions} 
+                            name="numQuestions"
+                            value={formData.numQuestions}
                             onChange={handleInputChange}
                             min="1"
                             max="50"
                             required
-                            style={{ 
-                                padding: '8px', 
-                                background: 'var(--bg-surface-elevated)', 
+                            style={{
+                                padding: '8px',
+                                background: 'var(--bg-surface-elevated)',
                                 border: '1px solid var(--border-subtle)',
                                 color: 'var(--text-primary)',
                                 borderRadius: 'var(--radius-sm)'
@@ -185,9 +247,82 @@ export const ExamBuilder: React.FC = () => {
                         />
                     </div>
 
+                    <div style={{ gridColumn: 'span 3', display: 'flex', flexDirection: 'column', gap: 'var(--space-xs)' }}>
+                        <label style={{ fontSize: '13px', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            Topics to Cover
+                            <span title="Auto-populated from curriculum selection, but can be manually edited.">
+                                <Info size={12} />
+                            </span>
+                        </label>
+                        <input
+                            name="topics"
+                            value={topicsInput}
+                            onChange={handleTopicsChange}
+                            placeholder="e.g. Matter, Energy, Ecosystems"
+                            required
+                            style={{
+                                padding: '10px',
+                                background: 'var(--bg-surface-elevated)',
+                                border: '1px solid var(--border-subtle)',
+                                color: 'var(--text-primary)',
+                                borderRadius: 'var(--radius-sm)',
+                                width: '100%'
+                            }}
+                        />
+                    </div>
+
+                    <div style={{ gridColumn: 'span 3', display: 'flex', flexDirection: 'column', gap: 'var(--space-xs)' }}>
+                        <label style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>Specific Instructions / Rubric (Optional)</label>
+                        <textarea
+                            name="customInstructions"
+                            value={customInstructions}
+                            onChange={(e) => setCustomInstructions(e.target.value)}
+                            placeholder="e.g. Candidates should answer all questions in Section A and any two in Section B."
+                            style={{
+                                padding: '10px',
+                                background: 'var(--bg-surface-elevated)',
+                                border: '1px solid var(--border-subtle)',
+                                color: 'var(--text-primary)',
+                                borderRadius: 'var(--radius-sm)',
+                                minHeight: '60px',
+                                resize: 'vertical',
+                                fontSize: '14px'
+                            }}
+                        />
+                    </div>
+
+                    <div style={{ gridColumn: 'span 3', display: 'flex', gap: 'var(--space-xl)', background: 'var(--bg-surface-elevated)', padding: '12px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-subtle)' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)', cursor: 'pointer' }}>
+                            <input
+                                type="checkbox"
+                                id="includeObjectives"
+                                name="includeObjectives"
+                                checked={formData.includeObjectives}
+                                onChange={handleInputChange}
+                                style={{ width: '16px', height: '16px', accentColor: 'var(--accent-primary)' }}
+                            />
+                            <label htmlFor="includeObjectives" style={{ fontSize: '14px', fontWeight: 500, cursor: 'pointer' }}>Include Objective Questions (Section A)</label>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)', cursor: 'pointer' }}>
+                            <input
+                                type="checkbox"
+                                id="includeTheory"
+                                name="includeTheory"
+                                checked={formData.includeTheory}
+                                onChange={handleInputChange}
+                                style={{ width: '16px', height: '16px', accentColor: 'var(--accent-primary)' }}
+                            />
+                            <label htmlFor="includeTheory" style={{ fontSize: '14px', fontWeight: 500, cursor: 'pointer' }}>Include Theory Questions (Section B)</label>
+                        </div>
+                    </div>
+
                     <div style={{ gridColumn: 'span 3', display: 'flex', justifyContent: 'flex-end', gap: 'var(--space-md)', marginTop: 'var(--space-sm)' }}>
                         <button type="button" onClick={() => { reset(); setSavedStatus(null); }} className="btn" disabled={loading}>Reset</button>
-                        <button type="submit" className="btn btn-primary" disabled={loading}>
+                        <button
+                            type="submit"
+                            className="btn btn-primary"
+                            disabled={loading || (!formData.includeTheory && !formData.includeObjectives)}
+                        >
                             {loading ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
                             {loading ? 'Generating Exam...' : 'Build Examination'}
                         </button>

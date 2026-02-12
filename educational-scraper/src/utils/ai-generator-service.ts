@@ -20,6 +20,10 @@ export interface ExamRequest {
     grade: string;
     topics: string[];
     numQuestions: number;
+    includeTheory: boolean;
+    includeObjectives: boolean;
+    strand?: string;
+    subStrand?: string;
 }
 
 /**
@@ -78,17 +82,32 @@ Please format the output in Markdown.
      */
     async generateExamination(params: ExamRequest): Promise<{ paper: string; markingScheme: string }> {
         const prompt = `
-You are an expert examiner in Ghana. Generate a ${params.type} examination paper following WAEC and GES standards.
+You are an expert examiner in Ghana. Generate a highly professional ${params.type} examination paper following WAEC and GES Standards-Based Curriculum guidelines.
 
 SUBJECT: ${params.subject}
 GRADE: ${params.grade}
+STRAND: ${params.strand || "General"}
+SUB-STRAND: ${params.subStrand || "General"}
 TOPICS: ${params.topics.join(", ")}
 NUMBER OF QUESTIONS: ${params.numQuestions}
 
+EXAM STRUCTURE:
+${params.includeObjectives ? `### PAPER 1 (OBJECTIVES)
+- Multiple choice questions with 4 options (A-D).
+- Focusing on knowledge and understanding.` : ""}
+
+${params.includeTheory ? `### PAPER 2 (ESSAY/THEORY)
+- Structured or essay questions.
+- Focusing on application and analysis.` : ""}
+
+INSTRUCTIONS TO CANDIDATES:
+${params.includeObjectives && params.includeTheory ? "1. This paper consists of two parts: Paper 1 and Paper 2.\n2. Answer all questions in Paper 1.\n3. Answer all questions in Paper 2." : "1. Answer all questions in this paper."}
+${params.topics.length > 0 ? `4. Ensure all responses are related to ${params.strand || params.subject}.` : ""}
+
 REQUIREMENTS:
-1. **Section A**: Multiple choice questions with 4 options each.
-2. **Section B**: Theory/Structured questions based on the topics.
-3. **Marking Scheme**: Provide a detailed marking scheme for all questions at the end, clearly separated.
+1. Format the paper with clear headings for "SECTION A" and "SECTION B" where applicable.
+2. Use professional language suitable for a ${params.grade} student.
+3. **Marking Scheme**: Provide a separate, detailed marking scheme with point allocation (e.g., [2 marks]) for every question.
 
 Please format the output as a JSON object with two fields: "paper" (the exam questions in Markdown) and "markingScheme" (the answers and marks allocation in Markdown).
         `.trim();
@@ -98,7 +117,7 @@ Please format the output as a JSON object with two fields: "paper" (the exam que
             const result = await this.model.generateContent(prompt);
             const response = await result.response;
             const text = response.text() || "{}";
-            
+
             try {
                 // Try to parse as JSON if the model followed instructions
                 const data = JSON.parse(text);

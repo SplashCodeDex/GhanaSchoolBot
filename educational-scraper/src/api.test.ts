@@ -14,7 +14,7 @@ describe('AI Generation API', () => {
                 strand: 'Number',
                 subStrand: 'Integers'
             });
-        
+
         assert.strictEqual(response.status, 200);
         assert.ok(response.body.hasOwnProperty('note'), "Response should have 'note' property");
         assert.strictEqual(typeof response.body.note, 'string');
@@ -27,10 +27,14 @@ describe('AI Generation API', () => {
                 type: 'BECE',
                 subject: 'Science',
                 grade: 'JHS3',
-                topics: ['Matter'],
-                numQuestions: 5
+                strand: 'Diversity of Matter',
+                subStrand: 'Living and Non-Living things',
+                topics: ['Classification'],
+                numQuestions: 5,
+                includeTheory: true,
+                includeObjectives: true
             });
-        
+
         assert.strictEqual(response.status, 200);
         assert.ok(response.body.hasOwnProperty('paper'), "Response should have 'paper' property");
         assert.ok(response.body.hasOwnProperty('markingScheme'), "Response should have 'markingScheme' property");
@@ -43,7 +47,7 @@ describe('AI Generation API', () => {
                 subject: 'Mathematics'
                 // missing grade, strand, etc.
             });
-        
+
         assert.strictEqual(response.status, 400);
     });
 
@@ -54,7 +58,7 @@ describe('AI Generation API', () => {
                 type: 'BECE'
                 // missing subject, grade, etc.
             });
-        
+
         assert.strictEqual(response.status, 400);
     });
 });

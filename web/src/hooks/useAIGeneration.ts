@@ -14,6 +14,10 @@ export interface ExamRequest {
     grade: string;
     topics: string[];
     numQuestions: number;
+    includeTheory: boolean;
+    includeObjectives: boolean;
+    strand?: string;
+    subStrand?: string;
 }
 
 export interface ExamResult {
