@@ -14,12 +14,12 @@
 - [x] Task: Write Tests - Verify semantic search returns relevant KB nodes. (90f9a8d)
 - [x] Task: Conductor - User Manual Verification 'Phase 2: Curriculum API' (Protocol in workflow.md) (ca144c7)
 
-## Phase 3: Dynamic Frontend Integration
-- [~] Task: Create web/src/hooks/useCurriculum.ts for fetching KB data.
-- [ ] Task: Refactor web/src/components/LessonNoteGenerator.tsx to use dynamic subjects and strands.
-- [ ] Task: Refactor web/src/components/ExamBuilder.tsx to use dynamic subjects and topics.
-- [ ] Task: Write Tests - Verify UI updates correctly when subject selection changes.
-- [~] Task: Conductor - User Manual Verification 'Phase 3: Dynamic Frontend' (Protocol in workflow.md)
+## Phase 3: Dynamic Frontend Integration [checkpoint: 673562b]
+- [x] Task: Create web/src/hooks/useCurriculum.ts for fetching KB data. (c553cdc)
+- [x] Task: Refactor web/src/components/LessonNoteGenerator.tsx to use dynamic subjects and strands. (c553cdc)
+- [x] Task: Refactor web/src/components/ExamBuilder.tsx to use dynamic subjects and topics. (c553cdc)
+- [x] Task: Write Tests - Verify UI updates correctly when subject selection changes. (c553cdc)
+- [x] Task: Conductor - User Manual Verification 'Phase 3: Dynamic Frontend' (Protocol in workflow.md) (673562b)
 
 ## Phase 4: Curriculum Explorer & Search UI
 - [ ] Task: Create web/src/components/CurriculumExplorer.tsx with tree browser and search bar.
