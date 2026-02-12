@@ -21,9 +21,9 @@
 - [x] Task: Write Tests - Verify UI updates correctly when subject selection changes. (c553cdc)
 - [x] Task: Conductor - User Manual Verification 'Phase 3: Dynamic Frontend' (Protocol in workflow.md) (673562b)
 
-## Phase 4: Curriculum Explorer & Search UI
-- [~] Task: Create web/src/components/CurriculumExplorer.tsx with tree browser and search bar.
-- [ ] Task: Implement 'Semantic Search' display in the Explorer.
-- [ ] Task: Integrate 'Curriculum Explorer' into the main Dashboard (App.tsx and Sidebar.tsx).
-- [ ] Task: Final Polish - Ensure breadcrumbs or 'Selected Context' is clear in the UI.
-- [~] Task: Conductor - User Manual Verification 'Phase 4: Curriculum Explorer' (Protocol in workflow.md)
+## Phase 4: Curriculum Explorer & Search UI [checkpoint: e0aa524]
+- [x] Task: Create web/src/components/CurriculumExplorer.tsx with tree browser and search bar. (e191bbd)
+- [x] Task: Implement 'Semantic Search' display in the Explorer. (e191bbd)
+- [x] Task: Integrate 'Curriculum Explorer' into the main Dashboard (App.tsx and Sidebar.tsx). (e191bbd)
+- [x] Task: Final Polish - Ensure breadcrumbs or 'Selected Context' is clear in the UI. (e191bbd)
+- [x] Task: Conductor - User Manual Verification 'Phase 4: Curriculum Explorer' (Protocol in workflow.md) (e0aa524)
