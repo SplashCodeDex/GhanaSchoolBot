@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 export interface Grade {
     id: string;
@@ -95,5 +96,72 @@ export class CurriculumService {
         });
 
         return results;
+    }
+
+    async semanticSearch(query: string, geminiApiKey: string): Promise<any[]> {
+        if (!geminiApiKey) {
+            return this.search(query);
+        }
+
+        const genAI = new GoogleGenerativeAI(geminiApiKey);
+        const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+
+        // Build a context of all strands and sub-strands
+        const contextItems: any[] = [];
+        this.kb.curriculum.forEach(node => {
+            node.strands.forEach(strand => {
+                contextItems.push({
+                    type: 'strand',
+                    gradeId: node.gradeId,
+                    subject: node.subject,
+                    name: strand.name,
+                    id: strand.id
+                });
+                strand.subStrands.forEach(ss => {
+                    contextItems.push({
+                        type: 'subStrand',
+                        gradeId: node.gradeId,
+                        subject: node.subject,
+                        strandName: strand.name,
+                        name: ss.name,
+                        id: ss.id,
+                        description: ss.description
+                    });
+                });
+            });
+        });
+
+        const prompt = `
+You are an expert in the Ghanaian GES curriculum.
+Given the following list of curriculum topics (Strands and Sub-strands) and a user query, identify the top 5 most relevant topics.
+
+USER QUERY: "${query}"
+
+CURRICULUM TOPICS (Sample):
+${JSON.stringify(contextItems.slice(0, 50))}
+
+INSTRUCTIONS:
+1. Return a JSON array of the top 5 relevant topic IDs.
+2. If nothing is relevant, return an empty array.
+3. Only return the JSON array, no other text.
+        `.trim();
+
+        try {
+            const result = await model.generateContent(prompt);
+            const response = await result.response;
+            const text = response.text();
+            
+            // Clean up the response to extract JSON array
+            const jsonMatch = text.match(/\[.*\]/s);
+            if (!jsonMatch) return this.search(query);
+            
+            const relevantIds = JSON.parse(jsonMatch[0]);
+
+            // Map IDs back to full objects
+            return contextItems.filter(item => relevantIds.includes(item.id));
+        } catch (error) {
+            console.error('Semantic search error:', error);
+            return this.search(query); // Fallback to keyword search
+        }
     }
 }

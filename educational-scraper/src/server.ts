@@ -173,6 +173,20 @@ app.get('/api/curriculum/structure', (req, res) => {
     res.json({ strands });
 });
 
+app.post('/api/curriculum/search', async (req, res) => {
+    try {
+        const { query } = req.body;
+        if (!query) {
+            return res.status(400).json({ error: 'query is required' });
+        }
+        const results = await curriculumService.semanticSearch(query, config.geminiApiKey);
+        res.json({ results });
+    } catch (error: any) {
+        console.error('[API] Curriculum search error:', error.message);
+        res.status(500).json({ error: 'Failed to perform semantic search' });
+    }
+});
+
 app.post('/api/ai/generate-lesson-note', async (req, res) => {
     try {
         const { subject, grade, strand, subStrand, additionalInstructions } = req.body;

@@ -17,4 +17,13 @@ describe("Curriculum API", () => {
         assert.ok(response.body.strands);
         assert.ok(response.body.strands.length > 0);
     });
+
+    test("POST /api/curriculum/search should return semantic results", async () => {
+        const response = await request(app)
+            .post("/api/curriculum/search")
+            .send({ query: "How to count numbers in JHS1" });
+        assert.strictEqual(response.status, 200);
+        assert.ok(Array.isArray(response.body.results));
+        assert.ok(response.body.results.length > 0);
+    });
 });
