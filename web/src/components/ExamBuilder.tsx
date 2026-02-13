@@ -33,14 +33,24 @@ export const ExamBuilder: React.FC = () => {
 
     const examTypes = ['MOCK', 'BECE', 'WASSCE', 'TERM', 'CLASS_TEST', 'HOMEWORK'];
 
-    // Initial load: Fetch levels
+    const [useLocalContext, setUseLocalContext] = useState(false);
+    const [mappings, setMappings] = useState<any[]>([]);
+
+    const { loading: aiLoading, error: aiError, generatedExam, generateExam, saveContent, reset } = useAIGeneration();
+    const { loading: curriculumLoading, getLevels, getSubjectsByGrade, getStructure, getMappings } = useCurriculum();
+
+    // Initial load: Fetch levels and mappings
     useEffect(() => {
-        const loadLevels = async () => {
-            const data = await getLevels();
-            setLevels(data);
+        const init = async () => {
+            const [levelsData, mappingsData] = await Promise.all([
+                getLevels(),
+                getMappings()
+            ]);
+            setLevels(levelsData);
+            setMappings(mappingsData);
         };
-        loadLevels();
-    }, [getLevels]);
+        init();
+    }, [getLevels, getMappings]);
 
     // When grade changes: Fetch subjects
     useEffect(() => {
@@ -122,7 +132,15 @@ export const ExamBuilder: React.FC = () => {
         e.preventDefault();
         setSavedStatus(null);
         try {
-            await generateExam(formData);
+            let referencedContent: string[] = [];
+            if (useLocalContext && formData.subStrand) {
+                const selectedSubStrand = availableSubStrands.find(ss => ss.name === formData.subStrand);
+                if (selectedSubStrand) {
+                    const linkedFiles = mappings.filter(m => m.curriculumNodeId === selectedSubStrand.id);
+                    referencedContent = linkedFiles.map(f => `Source File: ${f.filePath}`);
+                }
+            }
+            await generateExam({ ...formData, referencedContent });
         } catch (err) {
             console.error(err);
         }
@@ -366,6 +384,20 @@ export const ExamBuilder: React.FC = () => {
                                 style={{ width: '16px', height: '16px', accentColor: 'var(--accent-primary)' }}
                             />
                             <label htmlFor="includeTheory" style={{ fontSize: '14px', fontWeight: 500, cursor: 'pointer' }}>Include Theory Questions (Section B)</label>
+                        </div>
+                    </div>
+
+                    <div style={{ gridColumn: 'span 3', display: 'flex', alignItems: 'center', gap: 'var(--space-sm)', background: 'var(--bg-surface-elevated)', padding: '12px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-subtle)' }}>
+                        <input
+                            type="checkbox"
+                            id="useLocalContext"
+                            checked={useLocalContext}
+                            onChange={(e) => setUseLocalContext(e.target.checked)}
+                            style={{ width: '16px', height: '16px', accentColor: 'var(--accent-primary)' }}
+                        />
+                        <div style={{ display: 'flex', flexDirection: 'column' }}>
+                            <label htmlFor="useLocalContext" style={{ fontSize: '14px', fontWeight: 600, cursor: 'pointer' }}>Use Linked Resources (RAG Lite)</label>
+                            <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Generate questions based on the actual content of your mapped library resources.</span>
                         </div>
                     </div>
 

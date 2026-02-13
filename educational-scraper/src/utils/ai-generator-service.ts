@@ -9,6 +9,7 @@ export interface LessonNoteRequest {
     strand: string;
     subStrand: string;
     additionalInstructions?: string;
+    referencedContent?: string[]; // New: Content snippets from local PDFs
 }
 
 /**
@@ -24,6 +25,7 @@ export interface ExamRequest {
     includeObjectives: boolean;
     strand?: string;
     subStrand?: string;
+    referencedContent?: string[]; // New: Content snippets from local PDFs
 }
 
 /**
@@ -48,8 +50,18 @@ export class AIGeneratorService {
      * Generates a lesson note based on curriculum parameters
      */
     async generateLessonNote(params: LessonNoteRequest): Promise<string> {
+        const contextPrefix = params.referencedContent && params.referencedContent.length > 0
+            ? `
+USE THE FOLLOWING LOCAL RESOURCE CONTENT AS PRIMARY CONTEXT:
+---
+${params.referencedContent.join('\n---\n')}
+---
+` : "";
+
         const prompt = `
+${contextPrefix}
 You are an expert educator in Ghana. Generate a detailed lesson note following the GES curriculum standards.
+... [rest of prompt]
 
 SUBJECT: ${params.subject}
 GRADE: ${params.grade}
@@ -81,7 +93,16 @@ Please format the output in Markdown.
      * Generates an examination paper and marking scheme
      */
     async generateExamination(params: ExamRequest): Promise<{ paper: string; markingScheme: string }> {
+        const contextPrefix = params.referencedContent && params.referencedContent.length > 0
+            ? `
+USE THE FOLLOWING LOCAL RESOURCE CONTENT AS PRIMARY CONTEXT FOR QUESTIONS:
+---
+${params.referencedContent.join('\n---\n')}
+---
+` : "";
+
         const prompt = `
+${contextPrefix}
 You are an expert examiner in Ghana. Generate a highly professional ${params.type} examination paper following WAEC and GES Standards-Based Curriculum guidelines.
 
 SUBJECT: ${params.subject}

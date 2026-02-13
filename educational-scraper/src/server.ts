@@ -226,13 +226,13 @@ app.post('/api/mapping/predict', async (req, res) => {
 
 app.post('/api/ai/generate-lesson-note', async (req, res) => {
     try {
-        const { subject, grade, strand, subStrand, additionalInstructions } = req.body;
+        const { subject, grade, strand, subStrand, additionalInstructions, referencedContent } = req.body;
         if (!subject || !grade || !strand || !subStrand) {
             return res.status(400).json({ error: 'Missing required curriculum parameters' });
         }
 
         const note = await aiGenerator.generateLessonNote({
-            subject, grade, strand, subStrand, additionalInstructions
+            subject, grade, strand, subStrand, additionalInstructions, referencedContent
         });
         res.json({ note });
     } catch (error: any) {
@@ -243,7 +243,7 @@ app.post('/api/ai/generate-lesson-note', async (req, res) => {
 
 app.post('/api/ai/generate-exam', async (req, res) => {
     try {
-        const { type, subject, grade, topics, numQuestions, includeTheory, includeObjectives, strand, subStrand } = req.body;
+        const { type, subject, grade, topics, numQuestions, includeTheory, includeObjectives, strand, subStrand, referencedContent } = req.body;
         if (!type || !subject || !grade || !topics || !numQuestions) {
             return res.status(400).json({ error: 'Missing required examination parameters' });
         }
@@ -257,7 +257,8 @@ app.post('/api/ai/generate-exam', async (req, res) => {
             includeTheory: !!includeTheory,
             includeObjectives: !!includeObjectives,
             strand,
-            subStrand
+            subStrand,
+            referencedContent
         });
         res.json(result);
     } catch (error: any) {

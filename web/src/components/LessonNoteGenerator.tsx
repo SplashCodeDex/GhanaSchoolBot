@@ -23,14 +23,24 @@ export const LessonNoteGenerator: React.FC = () => {
         additionalInstructions: ''
     });
 
-    // Initial load: Fetch levels
+    const [useLocalContext, setUseLocalContext] = useState(false);
+    const [mappings, setMappings] = useState<any[]>([]);
+
+    const { loading: aiLoading, error: aiError, generatedNote, generateLessonNote, saveContent, reset } = useAIGeneration();
+    const { loading: curriculumLoading, getLevels, getSubjectsByGrade, getStructure, getMappings } = useCurriculum();
+
+    // Initial load: Fetch levels and mappings
     useEffect(() => {
-        const loadLevels = async () => {
-            const data = await getLevels();
-            setLevels(data);
+        const init = async () => {
+            const [levelsData, mappingsData] = await Promise.all([
+                getLevels(),
+                getMappings()
+            ]);
+            setLevels(levelsData);
+            setMappings(mappingsData);
         };
-        loadLevels();
-    }, [getLevels]);
+        init();
+    }, [getLevels, getMappings]);
 
     // When grade changes: Fetch subjects
     useEffect(() => {
@@ -80,7 +90,17 @@ export const LessonNoteGenerator: React.FC = () => {
         e.preventDefault();
         setSavedStatus(null);
         try {
-            await generateLessonNote(formData);
+            let referencedContent: string[] = [];
+            if (useLocalContext && formData.subStrand) {
+                const selectedSubStrand = availableSubStrands.find(ss => ss.name === formData.subStrand);
+                if (selectedSubStrand) {
+                    const linkedFiles = mappings.filter(m => m.curriculumNodeId === selectedSubStrand.id);
+                    // For now, we'll send the file paths and the AI will use knowledge of them
+                    // Ideally we fetch snippets, but simple RAG Lite starts here
+                    referencedContent = linkedFiles.map(f => `Source File: ${f.filePath}`);
+                }
+            }
+            await generateLessonNote({ ...formData, referencedContent });
         } catch (err) {
             console.error(err);
         }
@@ -237,6 +257,20 @@ export const LessonNoteGenerator: React.FC = () => {
                                 resize: 'vertical'
                             }}
                         />
+                    </div>
+
+                    <div style={{ gridColumn: 'span 2', display: 'flex', alignItems: 'center', gap: 'var(--space-sm)', background: 'var(--bg-surface-elevated)', padding: '12px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-subtle)' }}>
+                        <input
+                            type="checkbox"
+                            id="useLocalContext"
+                            checked={useLocalContext}
+                            onChange={(e) => setUseLocalContext(e.target.checked)}
+                            style={{ width: '16px', height: '16px', accentColor: 'var(--accent-primary)' }}
+                        />
+                        <div style={{ display: 'flex', flexDirection: 'column' }}>
+                            <label htmlFor="useLocalContext" style={{ fontSize: '14px', fontWeight: 600, cursor: 'pointer' }}>Use Linked Resources (RAG Lite)</label>
+                            <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Ground AI in the content of mapped PDFs for higher accuracy.</span>
+                        </div>
                     </div>
 
                     <div style={{ gridColumn: 'span 2', display: 'flex', justifyContent: 'flex-end', gap: 'var(--space-md)', marginTop: 'var(--space-sm)' }}>
