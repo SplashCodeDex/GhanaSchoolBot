@@ -94,10 +94,18 @@ const FileTreeItem: React.FC<FileTreeItemProps> = ({ item, onPreview, onAnalyze,
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', overflow: 'hidden' }}>
                     <span style={{ fontSize: '13px', color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.name}</span>
                     {mapping && (
-                        <span style={{ fontSize: '10px', color: 'var(--accent-primary)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }}>
-                            <CheckCircle2 size={10} />
-                            LINKED TO CURRICULUM
-                        </span>
+                        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                            <span style={{ fontSize: '10px', color: 'var(--accent-primary)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                <CheckCircle2 size={10} />
+                                LINKED
+                            </span>
+                            <button 
+                                onClick={(e) => { e.stopPropagation(); /* Logic to switch tab and select node would go here */ }}
+                                style={{ fontSize: '9px', background: 'none', border: 'none', color: 'var(--text-muted)', textDecoration: 'underline', cursor: 'pointer', padding: 0 }}
+                            >
+                                View in Explorer
+                            </button>
+                        </div>
                     )}
                 </div>
             </div>

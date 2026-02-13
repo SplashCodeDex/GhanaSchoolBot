@@ -44,7 +44,7 @@ describe('FileManager - Curriculum Mapping', () => {
         });
     });
 
-    it('should display "LINKED TO CURRICULUM" badge for mapped files', async () => {
+    it('should display "LINKED" badge for mapped files', async () => {
         render(
             <FileManager 
                 onPreview={() => {}} 
@@ -57,7 +57,7 @@ describe('FileManager - Curriculum Mapping', () => {
         );
 
         await waitFor(() => {
-            expect(screen.getByText('LINKED TO CURRICULUM')).toBeDefined();
+            expect(screen.getByText('LINKED')).toBeDefined();
         });
     });
 
