@@ -11,6 +11,7 @@ import { scanDirectory } from './utils/file-scanner';
 import { AIPdfAnalyzer } from './utils/ai-pdf-analyzer';
 import { AIGeneratorService } from './utils/ai-generator-service';
 import { CurriculumService } from './utils/curriculum-service';
+import { MappingService } from './utils/mapping-service';
 import { CoverageReporter } from './utils/coverage-reporter';
 
 const app = express();
@@ -151,6 +152,9 @@ const aiGenerator = new AIGeneratorService(config.geminiApiKey);
 // Initialize Curriculum Service
 const curriculumService = new CurriculumService();
 
+// Initialize Mapping Service
+const mappingService = new MappingService();
+
 // Initialize Coverage Reporter
 const coverageReporter = new CoverageReporter(config.geminiApiKey);
 
@@ -188,6 +192,35 @@ app.post('/api/curriculum/search', async (req, res) => {
     } catch (error: any) {
         console.error('[API] Curriculum search error:', error.message);
         res.status(500).json({ error: 'Failed to perform semantic search' });
+    }
+});
+
+// --- Mapping Endpoints ---
+
+app.get('/api/mapping', (req, res) => {
+    res.json(mappingService.getMappings());
+});
+
+app.post('/api/mapping/confirm', (req, res) => {
+    const { filePath, curriculumNodeId } = req.body;
+    if (!filePath || !curriculumNodeId) {
+        return res.status(400).json({ error: 'filePath and curriculumNodeId are required' });
+    }
+    mappingService.addMapping(filePath, curriculumNodeId);
+    res.json({ success: true });
+});
+
+app.post('/api/mapping/predict', async (req, res) => {
+    try {
+        const { filePath } = req.body;
+        if (!filePath) {
+            return res.status(400).json({ error: 'filePath is required' });
+        }
+        const prediction = await mappingService.predictMapping(filePath, config.geminiApiKey, curriculumService);
+        res.json({ prediction });
+    } catch (error: any) {
+        console.error('[API] Mapping prediction error:', error.message);
+        res.status(500).json({ error: 'Failed to predict mapping' });
     }
 });
 
