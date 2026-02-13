@@ -100,12 +100,72 @@ export const useCurriculum = () => {
         }
     }, []);
 
+    const getMappings = useCallback(async (): Promise<any[]> => {
+        setLoading(true);
+        setError(null);
+        try {
+            const res = await fetch(`${API_URL}/api/mapping`);
+            if (!res.ok) throw new Error('Failed to fetch mappings');
+            return await res.json();
+        } catch (err) {
+            const msg = err instanceof Error ? err.message : 'Unknown error';
+            setError(msg);
+            return [];
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
+    const predictMapping = useCallback(async (filePath: string): Promise<string | null> => {
+        setLoading(true);
+        setError(null);
+        try {
+            const res = await fetch(`${API_URL}/api/mapping/predict`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ filePath })
+            });
+            if (!res.ok) throw new Error('Prediction failed');
+            const data = await res.json();
+            return data.prediction;
+        } catch (err) {
+            const msg = err instanceof Error ? err.message : 'Unknown error';
+            setError(msg);
+            return null;
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
+    const confirmMapping = useCallback(async (filePath: string, curriculumNodeId: string): Promise<boolean> => {
+        setLoading(true);
+        setError(null);
+        try {
+            const res = await fetch(`${API_URL}/api/mapping/confirm`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ filePath, curriculumNodeId })
+            });
+            if (!res.ok) throw new Error('Confirmation failed');
+            return true;
+        } catch (err) {
+            const msg = err instanceof Error ? err.message : 'Unknown error';
+            setError(msg);
+            return false;
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
     return {
         loading,
         error,
         getLevels,
         getSubjectsByGrade,
         getStructure,
-        searchCurriculum
+        searchCurriculum,
+        getMappings,
+        predictMapping,
+        confirmMapping
     };
 };

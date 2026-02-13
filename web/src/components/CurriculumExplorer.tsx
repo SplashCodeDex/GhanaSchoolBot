@@ -9,13 +9,15 @@ import {
     Layers, 
     Target,
     Loader2,
-    ArrowRight
+    ArrowRight,
+    Files,
+    FileText
 } from 'lucide-react';
 import { useCurriculum } from '../hooks/useCurriculum';
 import type { Level, Strand, SubStrand } from '../hooks/useCurriculum';
 
 export const CurriculumExplorer: React.FC = () => {
-    const { loading, getLevels, getSubjectsByGrade, getStructure, searchCurriculum } = useCurriculum();
+    const { loading, getLevels, getSubjectsByGrade, getStructure, searchCurriculum, getMappings } = useCurriculum();
     
     const [levels, setLevels] = useState<Level[]>([]);
     const [searchQuery, setSearchQuery] = useState('');
@@ -29,14 +31,21 @@ export const CurriculumExplorer: React.FC = () => {
     // Dynamic data cache
     const [gradeSubjects, setGradeSubjects] = useState<Record<string, string[]>>({});
     const [subjectStructures, setSubjectStructures] = useState<Record<string, Strand[]>>({});
+    const [mappings, setMappings] = useState<any[]>([]);
 
     useEffect(() => {
         const init = async () => {
-            const data = await getLevels();
-            setLevels(data);
+            const [levelsData, mappingsData] = await Promise.all([
+                getLevels(),
+                getMappings()
+            ]);
+            setLevels(levelsData);
+            setMappings(mappingsData);
         };
         init();
-    }, [getLevels]);
+    }, [getLevels, getMappings]);
+
+    const linkedResources = selectedItem ? mappings.filter(m => m.curriculumNodeId === (selectedItem.id || selectedItem.subStrand?.id)) : [];
 
     const toggleNode = (id: string) => {
         setExpandedNodes(prev => ({ ...prev, [id]: !prev[id] }));
@@ -297,6 +306,29 @@ export const CurriculumExplorer: React.FC = () => {
                                     {!(selectedItem.indicators || selectedItem.subStrand?.indicators)?.length && (
                                         <div style={{ color: 'var(--text-muted)', fontSize: '13px', fontStyle: 'italic' }}>
                                             No specific indicators defined.
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+
+                            <div>
+                                <h4 style={{ fontSize: '14px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px', margin: '0 0 12px 0' }}>
+                                    <Files size={16} className="text-accent-primary" />
+                                    Linked Local Resources
+                                </h4>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                    {linkedResources.map((res, i) => (
+                                        <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px', background: 'var(--bg-surface-elevated)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-subtle)' }}>
+                                            <FileText size={16} style={{ color: 'var(--accent-primary)' }} />
+                                            <div style={{ flex: 1, fontSize: '13px', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                                {res.filePath.split(/[/\\]/).pop()}
+                                            </div>
+                                            <button className="btn" style={{ padding: '4px 8px', fontSize: '11px' }}>Preview</button>
+                                        </div>
+                                    ))}
+                                    {linkedResources.length === 0 && (
+                                        <div style={{ color: 'var(--text-muted)', fontSize: '13px', fontStyle: 'italic', padding: '12px', background: 'var(--bg-surface-muted)', borderRadius: 'var(--radius-sm)', border: '1px dashed var(--border-subtle)' }}>
+                                            No local resources linked to this topic yet.
                                         </div>
                                     )}
                                 </div>

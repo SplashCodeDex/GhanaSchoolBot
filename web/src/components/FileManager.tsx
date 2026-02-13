@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { Folder, File as FileIcon, Search, RefreshCcw, Brain, ChevronRight, ChevronDown } from 'lucide-react';
+import { Folder, File as FileIcon, Search, RefreshCcw, Brain, ChevronRight, ChevronDown, Link as LinkIcon, CheckCircle2, Sparkles } from 'lucide-react';
 import type { AnalysisData } from '../hooks/useAnalysis';
+import { useCurriculum } from '../hooks/useCurriculum';
 
 interface FileItem {
     name: string;
@@ -27,9 +28,11 @@ interface FileTreeItemProps {
     onPreview: (file: FileItem) => void;
     onAnalyze: (path: string) => void;
     isAnalyzing: boolean;
+    mapping?: any;
+    onLink: (file: FileItem) => void;
 }
 
-const FileTreeItem: React.FC<FileTreeItemProps> = ({ item, onPreview, onAnalyze, isAnalyzing }) => {
+const FileTreeItem: React.FC<FileTreeItemProps> = ({ item, onPreview, onAnalyze, isAnalyzing, mapping, onLink }) => {
     const isReviewQueue = item.name === 'Review_Needed';
     const [isOpen, setIsOpen] = useState(isReviewQueue); // Auto-expand review queue
 
@@ -61,7 +64,7 @@ const FileTreeItem: React.FC<FileTreeItemProps> = ({ item, onPreview, onAnalyze,
                 {isOpen && item.children && (
                     <div style={{ marginLeft: '12px', borderLeft: '1px solid var(--border-muted)' }}>
                         {item.children.map((child) => (
-                            <FileTreeItem key={child.path} item={child} onPreview={onPreview} onAnalyze={onAnalyze} isAnalyzing={isAnalyzing} />
+                            <FileTreeItem key={child.path} item={child} onPreview={onPreview} onAnalyze={onAnalyze} isAnalyzing={isAnalyzing} mapping={mapping} onLink={onLink} />
                         ))}
                         {item.children.length === 0 && <div style={{ padding: '8px 24px', fontStyle: 'italic', color: 'var(--text-muted)', fontSize: '12px' }}>Empty</div>}
                     </div>
@@ -88,25 +91,48 @@ const FileTreeItem: React.FC<FileTreeItemProps> = ({ item, onPreview, onAnalyze,
                 style={{ display: 'flex', alignItems: 'center', cursor: 'pointer', flex: 1, overflow: 'hidden' }}
             >
                 <FileIcon size={16} style={{ marginRight: '8px', color: 'var(--text-muted)' }} />
-                <span style={{ fontSize: '13px', color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.name}</span>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', overflow: 'hidden' }}>
+                    <span style={{ fontSize: '13px', color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.name}</span>
+                    {mapping && (
+                        <span style={{ fontSize: '10px', color: 'var(--accent-primary)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            <CheckCircle2 size={10} />
+                            LINKED TO CURRICULUM
+                        </span>
+                    )}
+                </div>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginLeft: '12px', flexShrink: 0 }}>
                 {isPdf(item.name) && (
-                    <button
-                        onClick={(e) => { e.stopPropagation(); onAnalyze(item.path); }}
-                        disabled={isAnalyzing}
-                        title="AI Analyze"
-                        className="btn"
-                        style={{
-                            padding: '2px 8px',
-                            fontSize: '11px',
-                            background: isAnalyzing ? 'var(--bg-surface-muted)' : 'rgba(16, 185, 129, 0.1)',
-                            color: 'var(--success)',
-                            borderColor: 'rgba(16, 185, 129, 0.2)'
-                        }}
-                    >
-                        {isAnalyzing ? '...' : <><Brain size={12} /> Analyze</>}
-                    </button>
+                    <>
+                        <button
+                            onClick={(e) => { e.stopPropagation(); onLink(item); }}
+                            className="btn"
+                            style={{
+                                padding: '2px 8px',
+                                fontSize: '11px',
+                                background: mapping ? 'rgba(59, 130, 246, 0.1)' : 'transparent',
+                                color: 'var(--accent-primary)',
+                                borderColor: 'rgba(59, 130, 246, 0.2)'
+                            }}
+                        >
+                            <LinkIcon size={12} /> {mapping ? 'Re-link' : 'Link'}
+                        </button>
+                        <button
+                            onClick={(e) => { e.stopPropagation(); onAnalyze(item.path); }}
+                            disabled={isAnalyzing}
+                            title="AI Analyze"
+                            className="btn"
+                            style={{
+                                padding: '2px 8px',
+                                fontSize: '11px',
+                                background: isAnalyzing ? 'var(--bg-surface-muted)' : 'rgba(16, 185, 129, 0.1)',
+                                color: 'var(--success)',
+                                borderColor: 'rgba(16, 185, 129, 0.2)'
+                            }}
+                        >
+                            {isAnalyzing ? '...' : <><Brain size={12} /> Analyze</>}
+                        </button>
+                    </>
                 )}
                 <span style={{ fontSize: '11px', color: 'var(--text-muted)', minWidth: '50px', textAlign: 'right' }}>
                     {formatBytes(item.size)}
@@ -135,25 +161,59 @@ export const FileManager: React.FC<FileManagerProps> = ({
     const [files, setFiles] = useState<FileItem[]>([]);
     const [loading, setLoading] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
+    const [mappings, setMappings] = useState<any[]>([]);
+    
+    // Mapping Modal State
+    const [mappingModal, setMappingModal] = useState<{ isOpen: boolean, file: FileItem | null, prediction: string | null, isPredicting: boolean }>({
+        isOpen: false,
+        file: null,
+        prediction: null,
+        isPredicting: false
+    });
 
-    const fetchFiles = async () => {
+    const { getMappings, predictMapping, confirmMapping } = useCurriculum();
+
+    const fetchFilesAndMappings = async () => {
         setLoading(true);
         try {
-            const res = await fetch('http://localhost:3001/api/files');
-            const data = await res.json();
-            setFiles(data);
+            const [filesRes, mappingsData] = await Promise.all([
+                fetch('http://localhost:3001/api/files'),
+                getMappings()
+            ]);
+            const filesData = await filesRes.json();
+            setFiles(filesData);
+            setMappings(mappingsData);
         } catch (err) {
-            console.error("Failed to load files", err);
+            console.error("Failed to load files/mappings", err);
         } finally {
             setLoading(false);
         }
     };
 
     useEffect(() => {
-        fetchFiles();
-        const interval = setInterval(fetchFiles, 30000);
+        fetchFilesAndMappings();
+        const interval = setInterval(fetchFilesAndMappings, 30000);
         return () => clearInterval(interval);
     }, []);
+
+    const handleLinkClick = async (file: FileItem) => {
+        setMappingModal({ isOpen: true, file, prediction: null, isPredicting: true });
+        try {
+            const prediction = await predictMapping(file.path);
+            setMappingModal(prev => ({ ...prev, prediction, isPredicting: false }));
+        } catch (err) {
+            setMappingModal(prev => ({ ...prev, isPredicting: false }));
+        }
+    };
+
+    const handleConfirmMapping = async (nodeId: string) => {
+        if (!mappingModal.file) return;
+        const success = await confirmMapping(mappingModal.file.path, nodeId);
+        if (success) {
+            setMappingModal({ isOpen: false, file: null, prediction: null, isPredicting: false });
+            fetchFilesAndMappings();
+        }
+    };
 
     const filterFiles = (fileList: FileItem[]): FileItem[] => {
         if (!searchQuery) return fileList;
@@ -169,8 +229,12 @@ export const FileManager: React.FC<FileManagerProps> = ({
 
     const filteredFiles = filterFiles(files);
 
+    const getFileMapping = (filePath: string) => {
+        return mappings.find(m => m.filePath === filePath);
+    };
+
     return (
-        <div className="card" style={{ padding: 0, height: '100%', display: 'flex', flexDirection: 'column' }}>
+        <div className="card" style={{ padding: 0, height: '100%', display: 'flex', flexDirection: 'column', position: 'relative' }}>
             <div style={{ padding: '16px', borderBottom: '1px solid var(--border-subtle)', background: 'var(--bg-surface-muted)' }}>
                 {/* AI Analysis Progress Overlay */}
                 {(isAnalyzing || analysisError) && (
@@ -207,7 +271,7 @@ export const FileManager: React.FC<FileManagerProps> = ({
                         <Folder size={18} className="text-muted" />
                         <h3 style={{ fontSize: '15px', fontWeight: 600, margin: 0 }}>Resource Manager</h3>
                     </div>
-                    <button onClick={fetchFiles} className="btn" style={{ padding: '6px' }} title="Refresh">
+                    <button onClick={fetchFilesAndMappings} className="btn" style={{ padding: '6px' }} title="Refresh">
                         <RefreshCcw size={14} className={loading ? 'spin' : ''} />
                     </button>
                 </div>
@@ -249,10 +313,80 @@ export const FileManager: React.FC<FileManagerProps> = ({
                             onPreview={onPreview}
                             onAnalyze={onAnalyze}
                             isAnalyzing={isAnalyzing}
+                            mapping={getFileMapping(item.path)}
+                            onLink={handleLinkClick}
                         />
                     ))
                 )}
             </div>
+
+            {/* Simple Mapping Modal/Overlay */}
+            {mappingModal.isOpen && (
+                <div style={{
+                    position: 'absolute',
+                    top: 0, left: 0, right: 0, bottom: 0,
+                    background: 'rgba(0,0,0,0.8)',
+                    zIndex: 100,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: '24px'
+                }}>
+                    <div className="card" style={{ maxWidth: '400px', width: '100%', border: '1px solid var(--accent-primary)' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
+                            <LinkIcon size={18} className="text-accent-primary" />
+                            <h3 style={{ fontSize: '16px', fontWeight: 600, margin: 0 }}>Curriculum Mapping</h3>
+                        </div>
+                        
+                        <div style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '16px' }}>
+                            Map <strong>{mappingModal.file?.name}</strong> to the GES Curriculum.
+                        </div>
+
+                        {mappingModal.isPredicting ? (
+                            <div style={{ padding: '24px', textAlign: 'center' }}>
+                                <Loader2 size={24} className="spin text-accent-primary" style={{ margin: '0 auto 12px' }} />
+                                <div style={{ fontSize: '12px' }}>AI is analyzing curriculum relevance...</div>
+                            </div>
+                        ) : (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                {mappingModal.prediction ? (
+                                    <div style={{ padding: '12px', background: 'rgba(59, 130, 246, 0.1)', border: '1px solid var(--accent-primary-muted)', borderRadius: 'var(--radius-sm)' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', fontWeight: 700, color: 'var(--accent-primary)', marginBottom: '4px' }}>
+                                            <Sparkles size={12} /> AI SUGGESTION
+                                        </div>
+                                        <div style={{ fontSize: '13px', fontWeight: 600, marginBottom: '8px' }}>
+                                            ID: {mappingModal.prediction}
+                                        </div>
+                                        <button 
+                                            onClick={() => handleConfirmMapping(mappingModal.prediction!)}
+                                            className="btn btn-primary" 
+                                            style={{ width: '100%', justifyContent: 'center' }}
+                                        >
+                                            Confirm Mapping
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <div style={{ fontSize: '12px', color: 'var(--danger)', padding: '8px', background: 'rgba(239, 68, 68, 0.1)', borderRadius: '4px' }}>
+                                        AI could not confidently map this file.
+                                    </div>
+                                )}
+                                
+                                <div style={{ fontSize: '11px', textAlign: 'center', color: 'var(--text-muted)' }}>
+                                    Full manual selector coming soon.
+                                </div>
+
+                                <button 
+                                    onClick={() => setMappingModal({ isOpen: false, file: null, prediction: null, isPredicting: false })}
+                                    className="btn" 
+                                    style={{ width: '100%', justifyContent: 'center' }}
+                                >
+                                    Cancel
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
