@@ -11,7 +11,7 @@
 - [x] Task: Implement `GET /api/mapping` and `POST /api/mapping/confirm` endpoints in `server.ts`. (85702b1)
 - [x] Task: Implement `POST /api/mapping/predict` (Gemini logic to analyze PDF metadata/content). (85702b1)
 - [x] Task: Write Tests - Verify API responses and AI prediction accuracy (mocked). (85702b1)
-- [ ] Task: Conductor - User Manual Verification 'Phase 2: AI Mapping API' (Protocol in workflow.md)
+- [~] Task: Conductor - User Manual Verification 'Phase 2: AI Mapping API' (Protocol in workflow.md)
 
 ## Phase 3: UI Integration (Explorer & Resources)
 - [ ] Task: Update `web/src/hooks/useCurriculum.ts` to fetch and handle mapping data.
