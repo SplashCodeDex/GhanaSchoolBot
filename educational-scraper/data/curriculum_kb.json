@@ -4,30 +4,66 @@
       "id": "primary",
       "name": "Primary School",
       "grades": [
-        { "id": "p1", "name": "Class 1" },
-        { "id": "p2", "name": "Class 2" },
-        { "id": "p3", "name": "Class 3" },
-        { "id": "p4", "name": "Class 4" },
-        { "id": "p5", "name": "Class 5" },
-        { "id": "p6", "name": "Class 6" }
+        {
+          "id": "p1",
+          "name": "Class 1"
+        },
+        {
+          "id": "p2",
+          "name": "Class 2"
+        },
+        {
+          "id": "p3",
+          "name": "Class 3"
+        },
+        {
+          "id": "p4",
+          "name": "Class 4"
+        },
+        {
+          "id": "p5",
+          "name": "Class 5"
+        },
+        {
+          "id": "p6",
+          "name": "Class 6"
+        }
       ]
     },
     {
       "id": "jhs",
       "name": "Junior High School",
       "grades": [
-        { "id": "jhs1", "name": "JHS 1 (Basic 7)" },
-        { "id": "jhs2", "name": "JHS 2 (Basic 8)" },
-        { "id": "jhs3", "name": "JHS 3 (Basic 9)" }
+        {
+          "id": "jhs1",
+          "name": "JHS 1 (Basic 7)"
+        },
+        {
+          "id": "jhs2",
+          "name": "JHS 2 (Basic 8)"
+        },
+        {
+          "id": "jhs3",
+          "name": "JHS 3 (Basic 9)"
+        }
       ]
     },
     {
       "id": "shs",
       "name": "Senior High School",
       "grades": [
-        { "id": "shs1", "name": "SHS 1" },
-        { "id": "shs2", "name": "SHS 2" },
-        { "id": "shs3", "name": "SHS 3" }
+        {
+          "id": "shs1",
+          "name": "SHS 1"
+        },
+        {
+          "id": "shs2",
+          "name": "SHS 2"
+        },
+        {
+          "id": "shs3",
+          "name": "SHS 3"
+        }
       ]
     }
   ],
@@ -71,6 +107,79 @@
               ],
               "description": "Foundational concepts of biological sciences.",
               "tips": "Focus on the scientific method and its application in biological research."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "gradeId": "jhs1",
+      "subject": "Creative Arts and Design",
+      "strands": [
+        {
+          "id": "cad_jhs1_s1",
+          "name": "Design",
+          "subStrands": [
+            {
+              "id": "cad_jhs1_s1_ss1",
+              "name": "Components of basic design",
+              "indicators": [
+                "Identify components of basic design"
+              ]
+            },
+            {
+              "id": "cad_jhs1_s1_ss2",
+              "name": "Principles of Design",
+              "indicators": [
+                "Explain principles of design"
+              ]
+            },
+            {
+              "id": "cad_jhs1_s1_ss3",
+              "name": "Colour",
+              "indicators": [
+                "Identify and use colors in design"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "cad_jhs1_s2",
+          "name": "Visual Arts",
+          "subStrands": [
+            {
+              "id": "cad_jhs1_s2_ss1",
+              "name": "Drawing",
+              "indicators": [
+                "Practice basic drawing techniques"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "cad_jhs1_s3",
+          "name": "Performing Arts",
+          "subStrands": [
+            {
+              "id": "cad_jhs1_s3_ss1",
+              "name": "Dance",
+              "indicators": [
+                "Perform basic dance movements"
+              ]
+            },
+            {
+              "id": "cad_jhs1_s3_ss2",
+              "name": "Drama",
+              "indicators": [
+                "Perform simple dramatic pieces"
+              ]
+            },
+            {
+              "id": "cad_jhs1_s3_ss3",
+              "name": "Music",
+              "indicators": [
+                "Identify African musical instruments"
+              ]
             }
           ]
         }

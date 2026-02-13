@@ -5,7 +5,7 @@
 - [x] Task: Create `educational-scraper/src/utils/mapping-service.ts` to handle storage and CRUD. (f6601b5)
 - [x] Task: Write Tests - Verify `MappingService` correctly saves, retrieves, and deletes file-to-ID links. (f6601b5)
 - [x] Task: Implement Feature - `MappingService` core logic and persistence. (f6601b5)
-- [ ] Task: Conductor - User Manual Verification 'Phase 1: Mapping Service' (Protocol in workflow.md)
+- [~] Task: Conductor - User Manual Verification 'Phase 1: Mapping Service' (Protocol in workflow.md)
 
 ## Phase 2: AI Mapping API & Prediction Engine
 - [ ] Task: Implement `GET /api/mapping` and `POST /api/mapping/confirm` endpoints in `server.ts`.

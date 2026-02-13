@@ -18,6 +18,8 @@
 
 ## AI & Intelligence
 - **Google Gemini API (@google/generative-ai):** Used for AI pre-filtering, resource classification, lesson note generation, examination building, and interactive chat assistance.
+- **Dynamic Knowledge Base (JSON):** A centralized, hierarchical repository of curriculum data used as the single source of truth.
+- **Semantic Search:** Implementation of vector-like search using Gemini to map natural language queries to curriculum nodes.
 
 ## Infrastructure & Integrations
 - **Google Drive API:** For cloud storage and organization of educational resources.

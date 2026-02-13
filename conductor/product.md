@@ -21,6 +21,7 @@ The Ghana School Bot aims to democratize access to high-quality educational mate
 - **Real-Time Dashboard:** A web-based control panel for monitoring scraping progress, statistics, and system logs.
 - **AI Pre-Filtering:** Analyze links intelligently before downloading to optimize bandwidth and ensure relevance.
 - **Review Queue:** A dedicated workflow for human verification of materials with low AI classification confidence.
+- **Curriculum Explorer:** A dedicated tool to browse the GES curriculum hierarchy (Grade, Subject, Strand, Sub-strand) and discover specific learning indicators.
 - **AI Lesson Note Generator:** A specialized interface to generate comprehensive lesson notes based on the GES curriculum, selected subjects, and specific strands/sub-strands.
 - **AI Examination Builder:** A tool to generate various examination types (Mock, BECE, WASSCE, Term Exam, Class Test, etc.) using curriculum standards and available past Q&A.
 - **AI Assistant (Chat Bot):** A general-purpose educational AI assistant to help users with curriculum questions, planning, and concept explanation.

@@ -1,4 +1,4 @@
-﻿# Project Tracks
+# Project Tracks
 
 This file tracks all major tracks for the project. Each track has its own detailed plan in its respective folder.
 
@@ -6,5 +6,5 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-## [~] Track: Implement Dynamic Curriculum Knowledge Base and Integrated Search
-*Link: [./conductor/tracks/dynamic_curriculum_kb_20260211/](./conductor/tracks/dynamic_curriculum_kb_20260211/)*
+## [~] Track: Implement Local Resource Mapping (PDF Linker)
+*Link: [./conductor/tracks/local_resource_mapping_20260212/](./conductor/tracks/local_resource_mapping_20260212/)*

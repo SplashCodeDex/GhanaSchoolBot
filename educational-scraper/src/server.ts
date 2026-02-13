@@ -11,6 +11,7 @@ import { scanDirectory } from './utils/file-scanner';
 import { AIPdfAnalyzer } from './utils/ai-pdf-analyzer';
 import { AIGeneratorService } from './utils/ai-generator-service';
 import { CurriculumService } from './utils/curriculum-service';
+import { CoverageReporter } from './utils/coverage-reporter';
 
 const app = express();
 const PORT = 3001;
@@ -149,6 +150,9 @@ const aiGenerator = new AIGeneratorService(config.geminiApiKey);
 
 // Initialize Curriculum Service
 const curriculumService = new CurriculumService();
+
+// Initialize Coverage Reporter
+const coverageReporter = new CoverageReporter(config.geminiApiKey);
 
 // --- Curriculum Endpoints ---
 
@@ -306,6 +310,28 @@ app.post('/api/analyze', async (req, res) => {
     } catch (error: any) {
         console.error('[API] Analysis error:', error.message);
         res.status(500).json({ error: error.message });
+    }
+});
+
+// --- Coverage Endpoints ---
+
+app.get('/api/coverage', async (req, res) => {
+    try {
+        const report = await coverageReporter.generateReport(downloadsPath);
+        res.json(report);
+    } catch (error: any) {
+        console.error('[API] Coverage report error:', error.message);
+        res.status(500).json({ error: 'Failed to generate coverage report' });
+    }
+});
+
+app.post('/api/coverage/re-index', async (req, res) => {
+    try {
+        const result = await coverageReporter.aiReIndex(downloadsPath);
+        res.json(result);
+    } catch (error: any) {
+        console.error('[API] AI Re-index error:', error.message);
+        res.status(500).json({ error: 'Failed to perform AI re-indexing' });
     }
 });
 
