@@ -17,7 +17,7 @@
 - [x] Task: Update `web/src/hooks/useCurriculum.ts` to fetch and handle mapping data. (b03b85c)
 - [x] Task: Update `CurriculumExplorer.tsx` to display "Linked Resources" in the detail panel. (b03b85c)
 - [x] Task: Update `FileManager.tsx` to show curriculum badges and add "Link to Curriculum" button. (b03b85c)
-- [ ] Task: Write Tests - Verify UI components render mapping data correctly.
+- [x] Task: Write Tests - Verify UI components render mapping data correctly. (8af5cdc)
 - [ ] Task: Conductor - User Manual Verification 'Phase 3: UI Integration' (Protocol in workflow.md)
 
 ## Phase 4: Contextual Content Generation (RAG Lite)
