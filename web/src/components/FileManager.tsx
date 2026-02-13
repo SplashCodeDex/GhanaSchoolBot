@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Folder, File as FileIcon, Search, RefreshCcw, Brain, ChevronRight, ChevronDown, Link as LinkIcon, CheckCircle2, Sparkles } from 'lucide-react';
+import { Folder, File as FileIcon, Search, RefreshCcw, Brain, ChevronRight, ChevronDown, Link as LinkIcon, CheckCircle2, Sparkles, Loader2 } from 'lucide-react';
 import type { AnalysisData } from '../hooks/useAnalysis';
 import { useCurriculum } from '../hooks/useCurriculum';
 
