@@ -7,11 +7,11 @@
 - [x] Task: Implement Feature - `MappingService` core logic and persistence. (f6601b5)
 - [x] Task: Conductor - User Manual Verification 'Phase 1: Mapping Service' (Protocol in workflow.md) (2a5ebd1)
 
-## Phase 2: AI Mapping API & Prediction Engine
+## Phase 2: AI Mapping API & Prediction Engine [checkpoint: 85b5a20]
 - [x] Task: Implement `GET /api/mapping` and `POST /api/mapping/confirm` endpoints in `server.ts`. (85702b1)
 - [x] Task: Implement `POST /api/mapping/predict` (Gemini logic to analyze PDF metadata/content). (85702b1)
 - [x] Task: Write Tests - Verify API responses and AI prediction accuracy (mocked). (85702b1)
-- [~] Task: Conductor - User Manual Verification 'Phase 2: AI Mapping API' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 2: AI Mapping API' (Protocol in workflow.md) (85b5a20)
 
 ## Phase 3: UI Integration (Explorer & Resources)
 - [ ] Task: Update `web/src/hooks/useCurriculum.ts` to fetch and handle mapping data.
