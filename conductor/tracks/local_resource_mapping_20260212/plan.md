@@ -14,9 +14,9 @@
 - [x] Task: Conductor - User Manual Verification 'Phase 2: AI Mapping API' (Protocol in workflow.md) (85b5a20)
 
 ## Phase 3: UI Integration (Explorer & Resources)
-- [ ] Task: Update `web/src/hooks/useCurriculum.ts` to fetch and handle mapping data.
-- [ ] Task: Update `CurriculumExplorer.tsx` to display "Linked Resources" in the detail panel.
-- [ ] Task: Update `FileManager.tsx` to show curriculum badges and add "Link to Curriculum" button.
+- [x] Task: Update `web/src/hooks/useCurriculum.ts` to fetch and handle mapping data. (b03b85c)
+- [x] Task: Update `CurriculumExplorer.tsx` to display "Linked Resources" in the detail panel. (b03b85c)
+- [x] Task: Update `FileManager.tsx` to show curriculum badges and add "Link to Curriculum" button. (b03b85c)
 - [ ] Task: Write Tests - Verify UI components render mapping data correctly.
 - [ ] Task: Conductor - User Manual Verification 'Phase 3: UI Integration' (Protocol in workflow.md)
 
