@@ -13,15 +13,15 @@
 - [x] Task: Write Tests - Verify API responses and AI prediction accuracy (mocked). (85702b1)
 - [x] Task: Conductor - User Manual Verification 'Phase 2: AI Mapping API' (Protocol in workflow.md) (85b5a20)
 
-## Phase 3: UI Integration (Explorer & Resources) [checkpoint: 7a8b387]
+## Phase 3: UI Integration (Explorer & Resources) [checkpoint: 90992a2]
 - [x] Task: Update `web/src/hooks/useCurriculum.ts` to fetch and handle mapping data. (b03b85c)
 - [x] Task: Update `CurriculumExplorer.tsx` to display "Linked Resources" in the detail panel. (b03b85c)
 - [x] Task: Update `FileManager.tsx` to show curriculum badges and add "Link to Curriculum" button. (b03b85c)
 - [x] Task: Write Tests - Verify UI components render mapping data correctly. (8af5cdc)
-- [x] Task: Conductor - User Manual Verification 'Phase 3: UI Integration' (Protocol in workflow.md) (7a8b387)
+- [x] Task: Conductor - User Manual Verification 'Phase 3: UI Integration' (Protocol in workflow.md) (90992a2)
 
 ## Phase 4: Contextual Content Generation (RAG Lite)
 - [x] Task: Enhance `AIGeneratorService.ts` to include local PDF text snippets in prompts. (91f8883)
 - [x] Task: Update `LessonNoteGenerator` and `ExamBuilder` with "Reference Local Files" toggle. (91f8883)
-- [ ] Task: Final Polish - Add navigation links (e.g., "View in Explorer" from File Manager).
+- [x] Task: Final Polish - Add navigation links (e.g., "View in Explorer" from File Manager). (90992a2)
 - [~] Task: Conductor - User Manual Verification 'Phase 4: Contextual Generation' (Protocol in workflow.md)
