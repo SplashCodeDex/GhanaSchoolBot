@@ -20,8 +20,8 @@
 - [x] Task: Write Tests - Verify UI components render mapping data correctly. (8af5cdc)
 - [x] Task: Conductor - User Manual Verification 'Phase 3: UI Integration' (Protocol in workflow.md) (90992a2)
 
-## Phase 4: Contextual Content Generation (RAG Lite)
+## Phase 4: Contextual Content Generation (RAG Lite) [checkpoint: 01d9ba6]
 - [x] Task: Enhance `AIGeneratorService.ts` to include local PDF text snippets in prompts. (91f8883)
 - [x] Task: Update `LessonNoteGenerator` and `ExamBuilder` with "Reference Local Files" toggle. (91f8883)
 - [x] Task: Final Polish - Add navigation links (e.g., "View in Explorer" from File Manager). (90992a2)
-- [~] Task: Conductor - User Manual Verification 'Phase 4: Contextual Generation' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 4: Contextual Generation' (Protocol in workflow.md) (01d9ba6)
