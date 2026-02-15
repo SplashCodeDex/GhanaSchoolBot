@@ -7,9 +7,6 @@ import type { Level, Strand, SubStrand } from '../hooks/useCurriculum';
 import { ContentPreview } from './ContentPreview';
 
 export const ExamBuilder: React.FC = () => {
-    const { loading: aiLoading, error: aiError, generatedExam, generateExam, saveContent, reset } = useAIGeneration();
-    const { loading: curriculumLoading, getLevels, getSubjectsByGrade, getStructure } = useCurriculum();
-    
     const [savedStatus, setSavedStatus] = useState<string | null>(null);
     const [levels, setLevels] = useState<Level[]>([]);
     const [subjects, setSubjects] = useState<string[]>([]);
